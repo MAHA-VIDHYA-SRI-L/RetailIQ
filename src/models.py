@@ -55,7 +55,7 @@ class Inventory(BaseModel):
 
 class IntentRequest(BaseModel):
     """Input query request for intent classification."""
-    question: str = Field(..., description="Natural-language question from retail operator")
+    question: str = Field(..., min_length=1, max_length=1000, description="Natural-language question from retail operator")
 
 
 class StructuredIntent(BaseModel):
@@ -77,8 +77,26 @@ class StructuredIntent(BaseModel):
     date_resolution_note: Optional[str] = Field(default=None, description="Audit note on date mapping")
 
 
+class CopilotQuestionRequest(BaseModel):
+    """Input request schema for copilot question endpoint."""
+    question: str = Field(..., min_length=1, max_length=1000, description="Natural-language retail question")
+
+
+class CopilotResponse(BaseModel):
+    """Structured copilot response model."""
+    answer: str = Field(..., description="Natural-language answer or explanation")
+    intent: str = Field(..., description="Classified intent")
+    data_status: str = Field(default="complete", description="complete | incomplete | no_data | ambiguous | unavailable")
+    needs_clarification: bool = Field(default=False, description="Whether question requires user clarification")
+    clarification_question: Optional[str] = Field(default=None, description="Prompt for resolving ambiguity")
+    evidence: List[Dict[str, Any]] = Field(default_factory=list, description="Grounding evidence records")
+    assumptions: List[str] = Field(default_factory=list, description="Assumptions and thresholds applied")
+    recommendations: List[str] = Field(default_factory=list, description="Deterministic actionable recommendations")
+    error: Optional[str] = Field(default=None, description="Application error message if any")
+
+
 class EvidenceFirstResponse(BaseModel):
-    """Grounding-backed copilot response structure."""
+    """Grounding-backed copilot response structure (alias)."""
     answer: str = Field(..., description="Natural-language synthesized explanation")
     intent: str = Field(..., description="Recognized intent")
     evidence: List[Dict[str, Any]] = Field(default_factory=list, description="Verified supporting records")

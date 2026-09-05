@@ -44,6 +44,18 @@ class IntentClassifier:
     # 1. Database Entity Matching & Ambiguity Resolution
     # --------------------------------------------------------------------------
 
+    STOPWORDS = {
+        "what", "were", "your", "our", "their", "this", "that", "these", "those",
+        "have", "from", "with", "about", "doing", "does", "selling", "sales", "sold",
+        "show", "tell", "best", "most", "item", "items", "good", "well", "much",
+        "many", "rate", "data", "view", "find", "give", "please", "help", "product",
+        "products", "store", "stores", "month", "year", "week", "today", "can",
+        "you", "the", "and", "for", "total", "summary", "how", "did", "performed",
+        "perform", "running", "likely", "soon", "overstocked", "attention", "today",
+        "compare", "between", "which", "will", "any", "all", "are", "low", "out",
+        "tell", "write", "poem", "retailers", "retail", "query", "is"
+    }
+
     def match_product(self, raw_product: Optional[str]) -> Tuple[Optional[str], Optional[str], bool, List[str]]:
         """Verify product name against database and detect ambiguities.
 
@@ -62,12 +74,19 @@ class IntentClassifier:
             if p["product_name"].lower() in query_clean:
                 return p["product_id"], p["product_name"], False, [p["product_name"]]
 
-        # 2. Token scoring for queries and partial phrases
-        tokens = [w for w in re.findall(r"\b[a-z]{4,}\b", query_clean)]
+        # 2. Token scoring for queries and partial phrases (whole words, non-stopwords)
+        tokens = [
+            w for w in re.findall(r"\b[a-z0-9]{3,}\b", query_clean)
+            if w not in self.STOPWORDS
+        ]
+        if not tokens:
+            return None, None, False, []
+
         scored = []
         for p in all_products:
             p_name_lower = p["product_name"].lower()
-            score = sum(1 for t in tokens if t in p_name_lower)
+            p_words = set(re.findall(r"\b[a-z0-9]{2,}\b", p_name_lower))
+            score = sum(1 for t in tokens if t in p_words or t in p_name_lower)
             if score > 0:
                 scored.append((score, p))
 
@@ -82,8 +101,6 @@ class IntentClassifier:
             return top_candidates[0]["product_id"], top_candidates[0]["product_name"], False, [top_candidates[0]["product_name"]]
         else:
             return None, None, True, [p["product_name"] for p in top_candidates[:5]]
-
-        return None, None, False, []
 
     def match_store(self, raw_store: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
         """Verify store name or city against database. Returns (store_id, store_name)."""
@@ -188,7 +205,7 @@ class IntentClassifier:
             return {"intent": "OVERSTOCK", "confidence": 0.95}
 
         # 3. Stock-Out Risk & Running Out
-        if any(w in q for w in ["run out", "running out", "stock out", "stock-out", "low stock", "depleted", "coverage"]):
+        if any(w in q for w in ["run out", "running out", "runs out", "stock out", "stock-out", "low stock", "low on stock", "low in stock", "running low", "shortage", "depleted", "coverage"]):
             return {"intent": "INVENTORY_RISK", "confidence": 0.95}
 
         # 4. Reorder recommendations
@@ -220,7 +237,7 @@ class IntentClassifier:
             return {"intent": "STORE_PERFORMANCE", "confidence": 0.85}
 
         # 11. Product performance
-        if any(w in q for w in ["mouse", "keyboard", "earbuds", "cable", "lamp", "flask", "tea", "coffee"]):
+        if any(w in q for w in ["mouse", "keyboard", "earbuds", "headphones", "cable", "lamp", "flask", "tea", "coffee", "wireless", "perform", "doing"]):
             return {"intent": "PRODUCT_PERFORMANCE", "confidence": 0.88}
 
         # 12. Overall sales summary
@@ -290,10 +307,23 @@ class IntentClassifier:
             raw_intent = fallback["intent"]
             confidence = fallback["confidence"]
 
+        # Determine relevant text targets for entity resolution
+        target_product_text = raw_product
+        if not target_product_text and raw_intent in ("PRODUCT_PERFORMANCE", "REORDER_RECOMMENDATION", "STORE_COMPARISON"):
+            target_product_text = question
+
+        target_store_text = raw_store
+        if not target_store_text and raw_intent in ("STORE_PERFORMANCE", "STORE_COMPARISON"):
+            target_store_text = question
+
+        target_cat_text = raw_category
+        if not target_cat_text and raw_intent == "CATEGORY_PERFORMANCE":
+            target_cat_text = question
+
         # Validate and match entities against SQLite database
-        product_id, matched_product, is_ambiguous, candidates = self.match_product(raw_product or question)
-        store_id, matched_store = self.match_store(raw_store or question)
-        matched_cat = self.match_category(raw_category or question)
+        product_id, matched_product, is_ambiguous, candidates = self.match_product(target_product_text)
+        store_id, matched_store = self.match_store(target_store_text)
+        matched_cat = self.match_category(target_cat_text)
         start_date, end_date, date_note = self.resolve_dates(raw_start, raw_end, question)
 
         # Ambiguity detection
@@ -309,10 +339,10 @@ class IntentClassifier:
             )
             confidence = 0.60
 
-        # Refine intent based on verified matched entities
-        if product_id and raw_intent in ("UNKNOWN", "SALES_SUMMARY"):
+        # Refine intent ONLY if intent was UNKNOWN and a specific entity was positively matched
+        if product_id and raw_intent == "UNKNOWN":
             raw_intent = "PRODUCT_PERFORMANCE"
-        if store_id and raw_intent in ("UNKNOWN", "SALES_SUMMARY") and not product_id:
+        elif store_id and raw_intent == "UNKNOWN":
             raw_intent = "STORE_PERFORMANCE"
 
         return StructuredIntent(

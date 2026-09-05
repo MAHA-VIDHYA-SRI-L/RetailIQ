@@ -6,6 +6,8 @@ from src.models import (
     HealthResponse,
     CopilotQueryRequest,
     CopilotQueryResponse,
+    CopilotQuestionRequest,
+    CopilotResponse,
     IntentRequest,
     StructuredIntent,
 )
@@ -27,6 +29,37 @@ async def api_health() -> HealthResponse:
 
 
 intent_classifier = IntentClassifier()
+
+
+@router.post("/copilot", response_model=CopilotResponse)
+async def ask_copilot(request: CopilotQuestionRequest) -> CopilotResponse:
+    """End-to-end RetailIQ AI Copilot query endpoint.
+    
+    Coordinates intent detection, deterministic SQL analytics, verified evidence
+    generation, and safe natural-language explanation.
+    """
+    if not request.question or not request.question.strip():
+        raise HTTPException(
+            status_code=400,
+            detail="Question cannot be empty or whitespace only."
+        )
+    if len(request.question) > 1000:
+        raise HTTPException(
+            status_code=400,
+            detail="Question is excessively large (max 1000 characters allowed)."
+        )
+    try:
+        response = copilot.answer_question(request.question)
+        return response
+    except Exception as exc:
+        # Never expose stack traces or credentials
+        return CopilotResponse(
+            answer="An unexpected error occurred while processing your question.",
+            intent="UNKNOWN",
+            data_status="unavailable",
+            needs_clarification=False,
+            error="Internal processing error.",
+        )
 
 
 @router.post("/copilot/intent", response_model=StructuredIntent)
