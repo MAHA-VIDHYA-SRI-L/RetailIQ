@@ -61,6 +61,10 @@ async def root(request: Request):
 @app.get("/{full_path:path}")
 async def serve_spa(full_path: str):
     """Serve frontend SPA for client-side routing, excluding /api, /health, /docs, /openapi.json."""
+    if full_path in ("api/index.py", "index.py", "api/index"):
+        if INDEX_HTML.exists():
+            return FileResponse(str(INDEX_HTML))
+
     if (
         full_path.startswith("api/")
         or full_path == "health"
