@@ -5,6 +5,7 @@ TRACK_ID=PS03
 <div align="center">
 
 [![Track](https://img.shields.io/badge/Hackathon_Track-PS03_Retail_Copilot-0ea5e9?style=for-the-badge)](https://github.com/MAHA-VIDHYA-SRI-L/RetailIQ)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-retailiq--eight.vercel.app-000000?style=for-the-badge&logo=vercel&logoColor=white)](https://retailiq-eight.vercel.app/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/React-18.3_TypeScript-61dafb?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
@@ -14,6 +15,8 @@ TRACK_ID=PS03
 **An evidence-grounded AI copilot bridging natural-language interaction with deterministic retail intelligence.**
 
 *Built for retail operators, inventory planners, and regional managers.*
+
+[**Explore Live Demo**](https://retailiq-eight.vercel.app/) • [**Interactive API Docs**](https://retailiq-eight.vercel.app/docs) • [**GitHub Repository**](https://github.com/MAHA-VIDHYA-SRI-L/RetailIQ)
 
 </div>
 
@@ -56,8 +59,9 @@ Retail operations generate massive amounts of daily transaction receipts and inv
 12. [Security, Safety & Reliability](#12-security-safety--reliability)
 13. [Installation & Getting Started](#13-installation--getting-started)
 14. [Evaluation & Test Suite](#14-evaluation--test-suite)
-15. [Future Roadmap](#15-future-roadmap)
-16. [Project & Hackathon Metadata](#16-project--hackathon-metadata)
+15. [Deployment Architecture](#15-deployment-architecture)
+16. [Future Roadmap](#16-future-roadmap)
+17. [Project & Hackathon Metadata](#17-project--hackathon-metadata)
 
 ---
 
@@ -210,15 +214,15 @@ RetailIQ enforces strict role separation between natural-language understanding 
 ### Inventory Intelligence
 * **Stock-Out Risk Engine**: Real-time identification of inventory below critical demand thresholds.
 * **Coverage Days Tracking**: Continuous evaluation of on-hand inventory duration based on rolling daily velocity.
-* **Overstock Detection**: Automatic flagging of items with $>45$ days of coverage and computation of idle capital.
-* **Velocity Classification**: ABC segmentation into Fast-moving ($>5$ units/day), Medium-moving ($1-5$ units/day), and Slow-moving ($<1$ unit/day) tiers.
+* **Overstock Detection**: Automatic flagging of items with $> 30.0$ days of coverage and computation of idle capital.
+* **Velocity Classification**: ABC segmentation into Fast-moving ($\ge 12.0$ units/day network), Medium-moving ($4.0 - 12.0$ units/day), and Slow-moving ($< 4.0$ units/day) tiers.
 * **Deterministic Reorder Sizing**: Replenishment recommendations calculated to maintain 21-day target buffer stock.
 
 ### Unified Attention Feed
 The **Priority Attention Feed** combines multi-dimensional operational signals into a single prioritized queue:
-1. **Critical Stockouts**: Coverage $\le 3.0$ days with high customer demand.
-2. **High Stockouts**: Coverage $\le 7.0$ days requiring supplier replenishment this week.
-3. **Severe Overstocks**: Substantial excess stock tying up working capital.
+1. **Critical Stockouts**: Coverage $\le 3.0$ days with active customer demand.
+2. **High Stockouts**: Coverage $3.0 - 7.0$ days requiring supplier replenishment this week.
+3. **Severe Overstocks**: Substantial excess stock ($> 30.0$ days) tying up working capital.
 4. **Demand Surges & Drops**: Unexpected velocity shifts compared to historical baselines.
 
 ### Interactive AI Copilot
@@ -246,10 +250,10 @@ $$\text{Recommended Reorder Quantity} = \max\left(0, \text{Target Stock} - \text
 | Risk Level | Coverage Days Threshold | Operational Meaning | System Action |
 | :--- | :---: | :--- | :--- |
 | **CRITICAL** | $\le 3.0$ days | Imminent stockout within 72 hours | Red alert; immediate priority purchase order |
-| **HIGH** | $\le 7.0$ days | Stockout likely within the current week | Amber alert; include in standard replenishment cycle |
-| **MEDIUM** | $\le 14.0$ days | Buffer stock within acceptable operating band | Monitor during routine review |
+| **HIGH** | $3.0 - 7.0$ days | Stockout likely within the current week | Amber alert; include in standard replenishment cycle |
+| **MEDIUM** | $7.0 - 14.0$ days | Buffer stock within acceptable operating band | Monitor during routine review |
 | **LOW / HEALTHY** | $> 14.0$ days | Fully stocked with adequate safety cushion | Normal operation; no action required |
-| **OVERSTOCK** | $> 45.0$ days | Excess inventory tying up operating capital | Pause procurement; consider promotional clearance |
+| **OVERSTOCK** | $> 30.0$ days | Excess inventory tying up operating capital | Pause procurement; consider promotional clearance |
 
 ---
 
@@ -312,19 +316,25 @@ RetailIQ ships with a validated synthetic retail dataset designed to model real-
 * `GET /api/analytics/categories` — Category breakdown with revenue contribution percentages.
 * `GET /api/analytics/products/{product_id}` — Granular sales analytics for a specific SKU.
 * `GET /api/analytics/stores/{store_id}` — Store-level performance metrics.
+* `GET /api/analytics/compare-periods` — Compare sales metrics across customized date ranges.
 
 ### Inventory Endpoints (`/api/inventory`)
 * `GET /api/inventory/health` — Inventory valuation, risk distributions, overstock metrics, and percentages.
 * `GET /api/inventory/risks` — Prioritized list of products at stockout risk sorted by coverage urgency.
-* `GET /api/inventory/overstock` — Overstocked records ($>45$ days coverage) with calculated locked capital.
+* `GET /api/inventory/overstock` — Overstocked records ($> 30.0$ days coverage) with calculated locked capital.
 * `GET /api/inventory/attention` — Operational attention feed merging stockouts, overstock, and velocity anomalies.
 * `GET /api/inventory/velocity` — Product segmentation into Fast, Medium, and Slow tiers.
 * `GET /api/inventory/{product_id}` — Store-by-store inventory and replenishment requirements for a SKU.
 
+### Catalog Endpoints (`/api/catalog`)
+* `GET /api/catalog/products` — Retrieve active product catalog with category filtering.
+* `GET /api/catalog/stores` — Retrieve list of retail store locations.
+
 ### Copilot & System Endpoints
 * `POST /api/copilot` — End-to-end question answering pipeline returning grounded answers and evidence tables.
 * `POST /api/copilot/intent` — Direct natural-language intent classification and entity resolution.
-* `GET /health` — Service health check identifying application status, name, and hackathon track.
+* `GET /health` — Service health check identifying application status, name, and hackathon track (`PS03`).
+* `GET /docs` — Interactive OpenAPI / Swagger documentation UI.
 
 ---
 
@@ -377,10 +387,10 @@ The following representative questions have been verified against the live Retai
 
 ### Prerequisites
 * Python 3.11+
-* Node.js 18+ (Only required if rebuilding the frontend; pre-compiled production assets are included)
-* Optional: Google Gemini API Key (for live narrative synthesis; deterministic analytics work without it)
+* Node.js 18+ *(Only required if editing frontend code; pre-compiled production bundle is already included in `frontend/dist/`)*
+* Optional: Google Gemini API Key *(for live LLM narrative synthesis; deterministic analytics function 100% offline without it)*
 
-### Quick Start (2-Step Execution)
+### Quick Start (Local)
 
 ```bash
 # 1. Clone repository
@@ -402,10 +412,10 @@ set GEMINI_API_KEY="your_api_key_here"
 python app.py
 ```
 
-Open your browser at:
-```text
-http://localhost:8000
-```
+Access the application in your browser:
+* **Dashboard UI**: [http://localhost:8000](http://localhost:8000)
+* **Interactive API Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+* **Health Check**: [http://localhost:8000/health](http://localhost:8000/health)
 
 ---
 
@@ -423,6 +433,8 @@ python -m pytest
 ```text
 ============================= test session starts =============================
 platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
+rootdir: E:\Inventions\RetailIQ
+plugins: anyio-4.12.1
 collected 99 items
 
 tests/test_analytics.py ................                                 [ 16%]
@@ -434,7 +446,7 @@ tests/test_gemini.py ...........                                         [ 80%]
 tests/test_health.py ..                                                  [ 82%]
 tests/test_inventory.py .................                                [100%]
 
-============================= 99 passed in 13.28s =============================
+============================= 99 passed in 11.44s =============================
 ```
 
 ### Automated Live Demonstration Validator
@@ -446,7 +458,18 @@ python scripts/validate_hackathon_demo.py
 
 ---
 
-## 15. Future Roadmap
+## 15. Deployment Architecture
+
+RetailIQ is production-configured for serverless cloud deployment on **Vercel**:
+
+* **Live Deployment URL**: [https://retailiq-eight.vercel.app/](https://retailiq-eight.vercel.app/)
+* **Zero Cold-Start Crash**: Automatically provisions the SQLite database into `/tmp/retailiq.db` in read-only serverless environments.
+* **Unified Entrypoint (`api/index.py`)**: Seamlessly wraps the FastAPI ASGI application with `VercelPathMiddleware` to handle path normalization and client routing.
+* **Pre-compiled SPA Bundle**: The React/TypeScript single-page application is compiled into `frontend/dist/` and served directly with asset caching.
+
+---
+
+## 16. Future Roadmap
 
 * **Live POS Webhook Ingestion**: Real-time integration with modern point-of-sale systems for sub-second inventory decrementing.
 * **Supplier Lead-Time Tracking**: Dynamic reorder threshold adjustment based on supplier shipping variances.
@@ -456,10 +479,12 @@ python scripts/validate_hackathon_demo.py
 
 ---
 
-## 16. Project & Hackathon Metadata
+## 17. Project & Hackathon Metadata
 
 * **Project Name**: RetailIQ — Evidence-First Sales & Inventory Copilot
 * **Hackathon Track**: `PS03 — Retail: Sales and Inventory Copilot`
+* **Live Deployment**: [https://retailiq-eight.vercel.app/](https://retailiq-eight.vercel.app/)
+* **Interactive API Docs**: [https://retailiq-eight.vercel.app/docs](https://retailiq-eight.vercel.app/docs)
 * **Repository**: [https://github.com/MAHA-VIDHYA-SRI-L/RetailIQ](https://github.com/MAHA-VIDHYA-SRI-L/RetailIQ)
 * **Architecture Style**: Evidence-First Deterministic Copilot
 * **License**: [MIT License](LICENSE)
