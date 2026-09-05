@@ -1,6 +1,7 @@
 """Configuration settings for RetailIQ."""
 
 import os
+import tempfile
 from pathlib import Path
 
 # Base paths
@@ -18,7 +19,12 @@ HOST = os.getenv("HOST", "0.0.0.0")
 PORT = int(os.getenv("PORT", "8000"))
 
 # Database settings
-DATABASE_PATH = os.getenv("DATABASE_PATH", str(DATA_DIR / "retailiq.db"))
+# On Vercel / serverless environments, the root directory is read-only.
+# SQLite database is placed in the writable /tmp directory.
+if os.getenv("VERCEL") or os.getenv("AWS_LAMBDA_FUNCTION_NAME"):
+    DATABASE_PATH = os.getenv("DATABASE_PATH", str(Path(tempfile.gettempdir()) / "retailiq.db"))
+else:
+    DATABASE_PATH = os.getenv("DATABASE_PATH", str(DATA_DIR / "retailiq.db"))
 
 # --------------------------------------------------------------------------
 # Inventory Intelligence Assumptions & Thresholds

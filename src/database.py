@@ -18,7 +18,10 @@ from src.config import DATABASE_PATH, DATA_DIR
 
 def ensure_data_directory(data_dir: Path = DATA_DIR) -> None:
     """Ensure the target data directory exists."""
-    data_dir.mkdir(parents=True, exist_ok=True)
+    try:
+        data_dir.mkdir(parents=True, exist_ok=True)
+    except OSError:
+        pass
 
 
 def get_connection(db_path: str | Path = DATABASE_PATH) -> sqlite3.Connection:
