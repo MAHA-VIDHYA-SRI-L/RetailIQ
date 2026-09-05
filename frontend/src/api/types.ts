@@ -137,9 +137,12 @@ export interface InventoryHealthSummary {
   overstocked_excess_units: number;
   overstocked_excess_value_inr: number;
   analysis_period: {
-    history_window_days: number;
-    sales_min_date: string;
-    sales_max_date: string;
+    history_window_days?: number;
+    sales_min_date?: string;
+    sales_max_date?: string;
+    days?: number;
+    start_date?: string;
+    end_date?: string;
   };
 }
 

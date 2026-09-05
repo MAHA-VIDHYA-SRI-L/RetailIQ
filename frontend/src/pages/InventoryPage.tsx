@@ -96,7 +96,7 @@ export const InventoryPage: React.FC = () => {
         />
         <KpiCard
           label="Critical Risk SKUs"
-          value={health?.risk_distribution.critical ?? 0}
+          value={health?.risk_distribution?.critical ?? 0}
           description="Coverage < 7.0 days of daily sales"
           icon={AlertOctagon}
           variant="rose"

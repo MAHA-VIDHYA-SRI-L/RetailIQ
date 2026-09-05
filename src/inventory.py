@@ -570,6 +570,8 @@ class InventoryIntelligenceEngine:
             total_records = len(rows)
             total_stock_units = 0
             total_stock_value = 0.0
+            overstocked_excess_units = 0
+            overstocked_excess_value = 0.0
 
             critical_count = 0
             high_count = 0
@@ -603,6 +605,10 @@ class InventoryIntelligenceEngine:
 
                 if (coverage is not None and coverage > OVERSTOCK_THRESHOLD_DAYS) or (status == "no_recent_demand" and stock >= 25):
                     overstocked_count += 1
+                    target_stock = round(avg_daily * OVERSTOCK_THRESHOLD_DAYS) if avg_daily > 0 else 10
+                    excess = max(0, stock - target_stock)
+                    overstocked_excess_units += excess
+                    overstocked_excess_value += excess * price
 
             velocity_summary = self.classify_product_velocities(window_days)
 
@@ -611,6 +617,7 @@ class InventoryIntelligenceEngine:
             healthy_pct = round((low_count / total_records) * 100.0, 1) if total_records > 0 else 0.0
 
             return {
+                "total_products_tracked": len(set(r["product_id"] for r in rows)),
                 "total_inventory_records": total_records,
                 "total_stock_units": total_stock_units,
                 "total_stock_value_inr": round(total_stock_value, 2),
@@ -622,6 +629,8 @@ class InventoryIntelligenceEngine:
                     "no_demand": no_demand_count,
                 },
                 "overstocked_records": overstocked_count,
+                "overstocked_excess_units": overstocked_excess_units,
+                "overstocked_excess_value_inr": round(overstocked_excess_value, 2),
                 "percentages": {
                     "critical_risk_pct": critical_pct,
                     "overstocked_pct": overstocked_pct,
@@ -629,7 +638,14 @@ class InventoryIntelligenceEngine:
                 },
                 "product_velocity_counts": velocity_summary["counts"],
                 "store_id": store_id,
-                "analysis_period": {"start_date": start_date, "end_date": end_date, "days": window_days},
+                "analysis_period": {
+                    "start_date": start_date,
+                    "end_date": end_date,
+                    "days": window_days,
+                    "history_window_days": window_days,
+                    "sales_min_date": start_date,
+                    "sales_max_date": end_date,
+                },
             }
         finally:
             conn.close()

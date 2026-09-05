@@ -73,8 +73,8 @@ export const DashboardPage: React.FC = () => {
     loadDashboardData();
   }, []);
 
-  const totalAtRisk = inventoryHealth
-    ? inventoryHealth.risk_distribution.critical + inventoryHealth.risk_distribution.high
+  const totalAtRisk = inventoryHealth?.risk_distribution
+    ? (inventoryHealth.risk_distribution.critical ?? 0) + (inventoryHealth.risk_distribution.high ?? 0)
     : 0;
 
   return (
@@ -123,7 +123,7 @@ export const DashboardPage: React.FC = () => {
         <KpiCard
           label="Stock-Out Risks"
           value={totalAtRisk}
-          description={`${inventoryHealth?.risk_distribution.critical ?? 0} Critical • ${inventoryHealth?.risk_distribution.high ?? 0} High priority`}
+          description={`${inventoryHealth?.risk_distribution?.critical ?? 0} Critical • ${inventoryHealth?.risk_distribution?.high ?? 0} High priority`}
           icon={AlertOctagon}
           variant="rose"
         />
@@ -274,10 +274,10 @@ export const DashboardPage: React.FC = () => {
                     Total Inventory Capital
                   </div>
                   <div className="mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--text-primary)', marginTop: '0.2rem' }}>
-                    ₹{inventoryHealth.total_stock_value_inr.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                    ₹{(inventoryHealth.total_stock_value_inr ?? 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
-                    {inventoryHealth.total_stock_units.toLocaleString('en-IN')} on-hand units
+                    {(inventoryHealth.total_stock_units ?? 0).toLocaleString('en-IN')} on-hand units
                   </div>
                 </div>
 
@@ -286,16 +286,16 @@ export const DashboardPage: React.FC = () => {
                     Excess Locked Capital
                   </div>
                   <div className="mono" style={{ fontSize: '1.25rem', fontWeight: 800, color: 'var(--accent-amber)', marginTop: '0.2rem' }}>
-                    ₹{inventoryHealth.overstocked_excess_value_inr.toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                    ₹{(inventoryHealth.overstocked_excess_value_inr ?? 0).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
                   </div>
                   <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', marginTop: '0.15rem' }}>
-                    {inventoryHealth.overstocked_excess_units.toLocaleString('en-IN')} units over target threshold
+                    {(inventoryHealth.overstocked_excess_units ?? 0).toLocaleString('en-IN')} units over target threshold
                   </div>
                 </div>
               </div>
 
               <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)', borderTop: '1px solid var(--border-color)', paddingTop: '0.5rem' }}>
-                Analysis window: last {inventoryHealth.analysis_period.history_window_days} days of demand history ({inventoryHealth.analysis_period.sales_min_date} to {inventoryHealth.analysis_period.sales_max_date}).
+                Analysis window: last {inventoryHealth.analysis_period?.history_window_days ?? inventoryHealth.analysis_period?.days ?? 30} days of demand history ({inventoryHealth.analysis_period?.sales_min_date ?? inventoryHealth.analysis_period?.start_date} to {inventoryHealth.analysis_period?.sales_max_date ?? inventoryHealth.analysis_period?.end_date}).
               </div>
             </div>
           )}
