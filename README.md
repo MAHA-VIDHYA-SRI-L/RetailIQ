@@ -237,11 +237,25 @@ The **Priority Attention Feed** combines multi-dimensional operational signals i
 
 RetailIQ implements standardized, auditable retail inventory logic:
 
+```text
+1. Average Daily Sales (ADS):
+   ADS = (Total Units Sold over 30 Days) / 30
+
+2. Days of Inventory Coverage:
+   Coverage Days = Current Stock / ADS
+
+3. Target Stock Buffer:
+   Target Stock = round(ADS × 21 Target Days)
+
+4. Recommended Reorder Quantity:
+   Reorder Qty = max(0, Target Stock - Current Stock)
+```
+
 $$\text{Average Daily Sales (ADS)} = \frac{\sum_{i=1}^{N} \text{Units Sold}_i}{\text{Demand Window Days (30)}}$$
 
 $$\text{Days of Coverage} = \frac{\text{Current Stock}}{\text{Average Daily Sales}}$$
 
-$$\text{Target Stock} = \operatorname{round}(\text{Average Daily Sales} \times \text{Target Coverage Days (21)})$$
+$$\text{Target Stock} = \text{round}\left(\text{Average Daily Sales} \times \text{Target Coverage Days (21)}\right)$$
 
 $$\text{Recommended Reorder Quantity} = \max\left(0, \text{Target Stock} - \text{Current Stock}\right)$$
 
