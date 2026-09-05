@@ -1,0 +1,41 @@
+product_id,product_name,category,unit_price,reorder_level
+PRD001,Wireless Optical Mouse,Electronics,599.0,25
+PRD002,Mechanical Gaming Keyboard,Electronics,2899.0,15
+PRD003,Bluetooth Soundbar 40W,Electronics,3499.0,10
+PRD004,10000mAh Fast Power Bank,Electronics,1199.0,20
+PRD005,Noise-Cancelling Wireless Earbuds,Electronics,2299.0,15
+PRD006,Smart Fitness Band with AMOLED,Electronics,1799.0,15
+PRD007,FHD USB Streaming Webcam 1080p,Electronics,1999.0,12
+PRD008,7-in-1 USB-C Hub Adapter,Electronics,1499.0,15
+PRD009,Braided Nylon USB-C Cable (2m),Accessories,299.0,40
+PRD010,Ergonomic Aluminum Laptop Stand,Accessories,1299.0,15
+PRD011,"Waterproof Laptop Backpack 15.6""",Accessories,1599.0,15
+PRD012,Microfiber Cleaning Cloth (Pack of 5),Accessories,199.0,30
+PRD013,Tempered Glass Screen Protector,Accessories,249.0,35
+PRD014,Wireless Car Charger Mount,Accessories,899.0,12
+PRD015,Cable Management Box Organizer,Accessories,449.0,20
+PRD016,Smart LED Desk Lamp with Dimmer,Home,1199.0,15
+PRD017,Ceramic Coffee Mug Set (Set of 4),Home,649.0,20
+PRD018,Stainless Steel Insulated Flask 1L,Home,899.0,25
+PRD019,Ultrasonic Aroma Diffuser & Humidifier,Home,1399.0,10
+PRD020,Cotton Bed Sheet Set (Queen Size),Home,1499.0,12
+PRD021,Non-Stick Induction Frying Pan 24cm,Home,1099.0,15
+PRD022,Bamboo Fiber Cutlery Tray Organizer,Home,599.0,15
+PRD023,Rechargeable Sonic Electric Toothbrush,Personal Care,1299.0,15
+PRD024,Cordless Men's Beard Trimmer,Personal Care,1499.0,15
+PRD025,Ionic Hair Dryer 1600W,Personal Care,1899.0,12
+PRD026,Organic Aloe Vera Soothing Gel 250ml,Personal Care,299.0,30
+PRD027,Activated Charcoal Toothpaste 150g,Personal Care,179.0,35
+PRD028,SPF 50 PA+++ Mineral Sunscreen Lotion,Personal Care,499.0,25
+PRD029,Hardcover Dot Grid Journal Notebook A5,Office,349.0,30
+PRD030,Gel Ink Rollerball Pens (Pack of 10),Office,199.0,40
+PRD031,Memory Foam Ergonomic Lumbar Cushion,Office,999.0,15
+PRD032,Desktop Metal Mesh File Tray 3-Tier,Office,699.0,15
+PRD033,Wireless Laser Presentation Remote Clicker,Office,849.0,10
+PRD034,Ergonomic Gel Keyboard Wrist Rest Pad,Office,399.0,20
+PRD035,Single Origin Arabica Whole Coffee Beans 250g,Grocery,449.0,25
+PRD036,Masala Chai Blend CTC Premium Tea 500g,Grocery,329.0,35
+PRD037,Cold-Pressed Virgin Coconut Oil 500ml,Grocery,379.0,25
+PRD038,Raw Multifloral Organic Honey 500g,Grocery,429.0,20
+PRD039,Roasted Salted California Almonds 200g,Grocery,299.0,30
+PRD040,Whole Grain Rolled Oats 1kg,Grocery,249.0,30

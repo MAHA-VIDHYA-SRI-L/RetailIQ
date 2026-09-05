@@ -320,28 +320,25 @@ RetailIQ/
 
 # Data
 
-RetailIQ uses a locally generated synthetic retail dataset designed to represent realistic business scenarios.
+RetailIQ uses a locally generated, deterministic synthetic retail dataset designed to represent realistic business scenarios.
 
-The dataset contains:
+The dataset includes:
 
-* Product information
-* Store information
-* Historical sales
-* Current inventory
-* Pricing information
-* Reorder thresholds
+* **Products**: 40 realistic products across 6 retail categories (Electronics, Accessories, Home, Personal Care, Office, Grocery) with realistic INR pricing and reorder thresholds.
+* **Stores**: 4 fictional retail stores situated in major Indian metropolitan centers (Bengaluru, Mumbai, Delhi, Hyderabad).
+* **Sales**: 120 days of historical sales records with realistic daily volume, weekday/weekend seasonality, and store-level demand variations.
+* **Inventory**: Complete store-product inventory snapshot (160 store-product combinations) with calibrated stock levels and reorder thresholds.
 
-The synthetic data includes realistic variations such as:
+The synthetic data intentionally models key real-world retail scenarios:
 
-* Fast-moving products
-* Slow-moving products
-* Stock-out risks
-* Overstock
-* Sales spikes
-* Sales declines
-* Store-specific demand differences
+* **Stock-out risks**: Products with critically low inventory relative to average daily sales (under 4 days of coverage).
+* **Overstock**: Items where current inventory substantially exceeds typical velocity (over 60 days of coverage).
+* **Recent sales spikes**: Products showing sudden acceleration compared to their baseline rate.
+* **Recent sales declines**: Products experiencing sharp drops compared to historical patterns.
+* **Store-specific performance**: Products exhibiting disproportionate demand in specific regional markets.
+* **Demand diversity**: Realistic distribution across fast-moving, medium-moving, and slow-moving items.
 
-No external dataset is required.
+All data is generated deterministically and validated locally. No external dataset or network request is required.
 
 ---
 
