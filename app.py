@@ -10,8 +10,46 @@ from src.models import HealthResponse, StatusResponse
 from src.api import router as api_router
 from src.database import init_db
 
+from urllib.parse import parse_qs, urlencode
+from starlette.types import ASGIApp, Receive, Scope, Send
+
 DIST_DIR = Path(__file__).parent / "frontend" / "dist"
 INDEX_HTML = DIST_DIR / "index.html"
+
+
+class VercelPathMiddleware:
+    """Middleware to normalize request paths under Vercel serverless rewrites."""
+
+    def __init__(self, app: ASGIApp):
+        self.app = app
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send):
+        if scope.get("type") == "http":
+            query_string = scope.get("query_string", b"").decode("latin1")
+            params = parse_qs(query_string)
+            if "__path__" in params:
+                req_path = params.pop("__path__", ["/"])[0]
+                if not req_path.startswith("/"):
+                    req_path = "/" + req_path
+                if len(req_path) > 1 and req_path.endswith("/"):
+                    req_path = req_path.rstrip("/")
+                scope["path"] = req_path
+                scope["raw_path"] = req_path.encode("latin1")
+                scope["query_string"] = urlencode(params, doseq=True).encode("latin1")
+            else:
+                headers = dict(scope.get("headers", []))
+                matched = headers.get(b"x-matched-path") or headers.get(b"x-forwarded-uri")
+                if matched:
+                    path_str = matched.decode("latin1").split("?")[0]
+                    scope["path"] = path_str
+                    scope["raw_path"] = path_str.encode("latin1")
+                else:
+                    path = scope.get("path", "")
+                    if path.startswith("/api/index.py"):
+                        scope["path"] = path[len("/api/index.py"):] or "/"
+                    elif path.startswith("/api/index"):
+                        scope["path"] = path[len("/api/index"):] or "/"
+        await self.app(scope, receive, send)
 
 
 @asynccontextmanager
@@ -27,6 +65,8 @@ app = FastAPI(
     version=VERSION,
     lifespan=lifespan,
 )
+
+app.add_middleware(VercelPathMiddleware)
 
 # Include modular API router
 app.include_router(api_router)
