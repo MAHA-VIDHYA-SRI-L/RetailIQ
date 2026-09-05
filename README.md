@@ -51,17 +51,17 @@ Retail operations generate massive amounts of daily transaction receipts and inv
    - [Inventory Intelligence](#inventory-intelligence)
    - [Unified Attention Feed](#unified-attention-feed)
    - [Interactive AI Copilot](#interactive-ai-copilot)
-7. [Inventory Mathematics & Risk Matrix](#7-inventory-mathematics--risk-matrix)
-8. [Ambiguity & Boundary Handling](#8-ambiguity--boundary-handling)
+7. [Inventory Mathematics & Risk Matrix](#7-inventory-mathematics-risk-matrix)
+8. [Ambiguity & Boundary Handling](#8-ambiguity-boundary-handling)
 9. [Dataset Specification](#9-dataset-specification)
 10. [REST API Reference](#10-rest-api-reference)
 11. [Validated Demo Scenarios](#11-validated-demo-scenarios)
-12. [Security, Safety & Reliability](#12-security-safety--reliability)
-13. [Installation & Getting Started](#13-installation--getting-started)
-14. [Evaluation & Test Suite](#14-evaluation--test-suite)
+12. [Security, Safety & Reliability](#12-security-safety-reliability)
+13. [Installation & Getting Started](#13-installation-getting-started)
+14. [Evaluation & Test Suite](#14-evaluation-test-suite)
 15. [Deployment Architecture](#15-deployment-architecture)
 16. [Future Roadmap](#16-future-roadmap)
-17. [Project & Hackathon Metadata](#17-project--hackathon-metadata)
+17. [Project & Hackathon Metadata](#17-project-hackathon-metadata)
 
 ---
 
@@ -188,12 +188,12 @@ RetailIQ enforces strict role separation between natural-language understanding 
 | **Intent & Confidence Scoring** | Gemini + Python Fallback | Fallback to deterministic regex/keyword heuristics if offline. |
 | **Entity Resolution & Validation** | Python + SQLite Catalog | Validates SKU IDs, product names, aliases, and store locations. |
 | **Ambiguity Detection** | Python Algorithm | Detects multi-product matches (e.g. *"headphones"*) and requests clarification. |
-| **Revenue Calculation** | Python Deterministic Math | Exact line-item computation: $\text{Revenue} = \text{Quantity} \times \text{Unit Price}$. |
+| **Revenue Calculation** | Python Deterministic Math | Exact line-item computation: Revenue = Quantity × Unit Price. |
 | **Sales Aggregation** | Python + SQLite | Parameterized SQL sums, daily velocity, and period comparisons. |
 | **Average Daily Sales (ADS)** | Python | Rolling 30-day demand velocity calculation. |
-| **Inventory Coverage** | Python | Safe zero-division computation: $\text{Current Stock} / \text{ADS}$. |
+| **Inventory Coverage** | Python | Safe zero-division computation: Current Stock / ADS. |
 | **Stockout Risk Classification** | Python | Categorization into `CRITICAL`, `HIGH`, `MEDIUM`, and `LOW`. |
-| **Target Stock & Reorder Sizing** | Python | Quantitative formula: $\max(0, \text{Target Stock} - \text{Current Stock})$. |
+| **Target Stock & Reorder Sizing** | Python | Quantitative formula: max(0, Target Stock - Current Stock). |
 | **Evidence Formulation** | Python | Packages computed numerical proofs into auditable evidence tables. |
 | **Executive Synthesis & Narrative** | Google Gemini API | Explains verified results in natural English based exclusively on evidence. |
 
@@ -214,15 +214,15 @@ RetailIQ enforces strict role separation between natural-language understanding 
 ### Inventory Intelligence
 * **Stock-Out Risk Engine**: Real-time identification of inventory below critical demand thresholds.
 * **Coverage Days Tracking**: Continuous evaluation of on-hand inventory duration based on rolling daily velocity.
-* **Overstock Detection**: Automatic flagging of items with $> 30.0$ days of coverage and computation of idle capital.
-* **Velocity Classification**: ABC segmentation into Fast-moving ($\ge 12.0$ units/day network), Medium-moving ($4.0 - 12.0$ units/day), and Slow-moving ($< 4.0$ units/day) tiers.
+* **Overstock Detection**: Automatic flagging of items with > 30.0 days of coverage and computation of idle capital.
+* **Velocity Classification**: ABC segmentation into Fast-moving (≥ 12.0 units/day network), Medium-moving (4.0 – 12.0 units/day), and Slow-moving (< 4.0 units/day) tiers.
 * **Deterministic Reorder Sizing**: Replenishment recommendations calculated to maintain 21-day target buffer stock.
 
 ### Unified Attention Feed
 The **Priority Attention Feed** combines multi-dimensional operational signals into a single prioritized queue:
-1. **Critical Stockouts**: Coverage $\le 3.0$ days with active customer demand.
-2. **High Stockouts**: Coverage $3.0 - 7.0$ days requiring supplier replenishment this week.
-3. **Severe Overstocks**: Substantial excess stock ($> 30.0$ days) tying up working capital.
+1. **Critical Stockouts**: Coverage ≤ 3.0 days with active customer demand.
+2. **High Stockouts**: Coverage 3.0 – 7.0 days requiring supplier replenishment this week.
+3. **Severe Overstocks**: Substantial excess stock (> 30.0 days) tying up working capital.
 4. **Demand Surges & Drops**: Unexpected velocity shifts compared to historical baselines.
 
 ### Interactive AI Copilot
@@ -238,36 +238,37 @@ The **Priority Attention Feed** combines multi-dimensional operational signals i
 RetailIQ implements standardized, auditable retail inventory logic:
 
 ```text
-1. Average Daily Sales (ADS):
-   ADS = (Total Units Sold over 30 Days) / 30
-
-2. Days of Inventory Coverage:
-   Coverage Days = Current Stock / ADS
-
-3. Target Stock Buffer:
-   Target Stock = round(ADS × 21 Target Days)
-
-4. Recommended Reorder Quantity:
-   Reorder Qty = max(0, Target Stock - Current Stock)
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                       Core Inventory Formulations                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 1. Average Daily Sales (ADS):                                               │
+│    ADS = (Σ Units Sold over 30-Day Demand Window) / 30                      │
+│                                                                             │
+│ 2. Days of Inventory Coverage:                                              │
+│    Coverage Days = Current Stock / ADS                                      │
+│                                                                             │
+│ 3. Target Buffer Stock:                                                     │
+│    Target Stock = round(ADS × 21 Target Coverage Days)                      │
+│                                                                             │
+│ 4. Recommended Reorder Quantity:                                            │
+│    Reorder Qty = max(0, Target Stock - Current Stock)                       │
+└─────────────────────────────────────────────────────────────────────────────┘
 ```
 
-$$\text{Average Daily Sales (ADS)} = \frac{\sum_{i=1}^{N} \text{Units Sold}_i}{\text{Demand Window Days (30)}}$$
-
-$$\text{Days of Coverage} = \frac{\text{Current Stock}}{\text{Average Daily Sales}}$$
-
-$$\text{Target Stock} = \text{round}\left(\text{Average Daily Sales} \times \text{Target Coverage Days (21)}\right)$$
-
-$$\text{Recommended Reorder Quantity} = \max\left(0, \text{Target Stock} - \text{Current Stock}\right)$$
+* **Average Daily Sales (ADS)**: `ADS = (Total Units Sold over 30 Days) / 30`
+* **Days of Coverage**: `Coverage Days = Current Stock / Average Daily Sales`
+* **Target Stock Buffer**: `Target Stock = round(Average Daily Sales × 21 Days)`
+* **Recommended Reorder Quantity**: `Reorder Qty = max(0, Target Stock - Current Stock)`
 
 ### Risk Classification Matrix
 
 | Risk Level | Coverage Days Threshold | Operational Meaning | System Action |
 | :--- | :---: | :--- | :--- |
-| **CRITICAL** | $\le 3.0$ days | Imminent stockout within 72 hours | Red alert; immediate priority purchase order |
-| **HIGH** | $3.0 - 7.0$ days | Stockout likely within the current week | Amber alert; include in standard replenishment cycle |
-| **MEDIUM** | $7.0 - 14.0$ days | Buffer stock within acceptable operating band | Monitor during routine review |
-| **LOW / HEALTHY** | $> 14.0$ days | Fully stocked with adequate safety cushion | Normal operation; no action required |
-| **OVERSTOCK** | $> 30.0$ days | Excess inventory tying up operating capital | Pause procurement; consider promotional clearance |
+| **CRITICAL** | ≤ 3.0 days | Imminent stockout within 72 hours | Red alert; immediate priority purchase order |
+| **HIGH** | 3.0 – 7.0 days | Stockout likely within the current week | Amber alert; include in standard replenishment cycle |
+| **MEDIUM** | 7.0 – 14.0 days | Buffer stock within acceptable operating band | Monitor during routine review |
+| **LOW / HEALTHY** | > 14.0 days | Fully stocked with adequate safety cushion | Normal operation; no action required |
+| **OVERSTOCK** | > 30.0 days | Excess inventory tying up operating capital | Pause procurement; consider promotional clearance |
 
 ---
 
@@ -317,7 +318,7 @@ RetailIQ ships with a validated synthetic retail dataset designed to model real-
   * Total Network Revenue: **₹34,099,044.00**
   * Total Units Sold: **39,226 units**
 * **Inventory State (`data/inventory.csv`)**: **160 SKU-store combinations** with calibrated stock and reorder thresholds.
-  * Verified Mathematical Integrity: $\text{Revenue} = \text{Quantity} \times \text{Unit Price}$ across 100% of rows (0 mismatches).
+  * Verified Mathematical Integrity: Revenue = Quantity × Unit Price across 100% of rows (0 mismatches).
 
 ---
 
@@ -335,7 +336,7 @@ RetailIQ ships with a validated synthetic retail dataset designed to model real-
 ### Inventory Endpoints (`/api/inventory`)
 * `GET /api/inventory/health` — Inventory valuation, risk distributions, overstock metrics, and percentages.
 * `GET /api/inventory/risks` — Prioritized list of products at stockout risk sorted by coverage urgency.
-* `GET /api/inventory/overstock` — Overstocked records ($> 30.0$ days coverage) with calculated locked capital.
+* `GET /api/inventory/overstock` — Overstocked records (> 30.0 days coverage) with calculated locked capital.
 * `GET /api/inventory/attention` — Operational attention feed merging stockouts, overstock, and velocity anomalies.
 * `GET /api/inventory/velocity` — Product segmentation into Fast, Medium, and Slow tiers.
 * `GET /api/inventory/{product_id}` — Store-by-store inventory and replenishment requirements for a SKU.
