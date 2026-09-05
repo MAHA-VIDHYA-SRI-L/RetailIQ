@@ -74,7 +74,15 @@ class IntentClassifier:
             if p["product_name"].lower() in query_clean:
                 return p["product_id"], p["product_name"], False, [p["product_name"]]
 
-        # 2. Token scoring for queries and partial phrases (whole words, non-stopwords)
+        # 2. Token scoring with synonym/alias expansion
+        SYNONYMS: Dict[str, List[str]] = {
+            "headphone": ["earbuds", "soundbar"],
+            "headphones": ["earbuds", "soundbar"],
+            "earphone": ["earbuds"],
+            "earphones": ["earbuds"],
+            "audio": ["earbuds", "soundbar"],
+        }
+
         tokens = [
             w for w in re.findall(r"\b[a-z0-9]{3,}\b", query_clean)
             if w not in self.STOPWORDS
@@ -82,11 +90,16 @@ class IntentClassifier:
         if not tokens:
             return None, None, False, []
 
+        expanded_tokens = list(tokens)
+        for t in tokens:
+            if t in SYNONYMS:
+                expanded_tokens.extend(SYNONYMS[t])
+
         scored = []
         for p in all_products:
             p_name_lower = p["product_name"].lower()
             p_words = set(re.findall(r"\b[a-z0-9]{2,}\b", p_name_lower))
-            score = sum(1 for t in tokens if t in p_words or t in p_name_lower)
+            score = sum(1 for t in expanded_tokens if t in p_words)
             if score > 0:
                 scored.append((score, p))
 
@@ -177,6 +190,35 @@ class IntentClassifier:
             elif len(explicit_dates) == 1:
                 start_date, end_date = explicit_dates[0], explicit_dates[0]
                 note = f"Extracted date: {start_date}."
+
+        # Extract Month YYYY expressions (e.g. "January 2030", "Aug 2026")
+        if not start_date or not end_date:
+            month_year_match = re.search(
+                r"\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\s+(\d{4})\b",
+                q_lower,
+            )
+            if month_year_match:
+                m_str, y_str = month_year_match.group(1), month_year_match.group(2)
+                month_map = {
+                    "january": 1, "jan": 1, "february": 2, "feb": 2, "march": 3, "mar": 3,
+                    "april": 4, "apr": 4, "may": 5, "june": 6, "jun": 6, "july": 7, "jul": 7,
+                    "august": 8, "aug": 8, "september": 9, "sep": 9, "sept": 9, "october": 10, "oct": 10,
+                    "november": 11, "nov": 11, "december": 12, "dec": 12
+                }
+                m_num = month_map.get(m_str, 1)
+                y_num = int(y_str)
+                days_in_month = (31, 29 if (y_num % 4 == 0 and (y_num % 100 != 0 or y_num % 400 == 0)) else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)[m_num - 1]
+                start_date = f"{y_num:04d}-{m_num:02d}-01"
+                end_date = f"{y_num:04d}-{m_num:02d}-{days_in_month:02d}"
+                note = f"Extracted period: {m_str.title()} {y_num} ({start_date} to {end_date})."
+            else:
+                year_match = re.search(r"\b(20\d{2})\b", q_lower)
+                if year_match:
+                    y_num = int(year_match.group(1))
+                    if y_num != 2026 or "year" in q_lower or "in 2026" in q_lower:
+                        start_date = f"{y_num:04d}-01-01"
+                        end_date = f"{y_num:04d}-12-31"
+                        note = f"Extracted calendar year {y_num} ({start_date} to {end_date})."
 
         # Detect relative date expressions in user query if still unresolved
         if not start_date or not end_date:

@@ -7,6 +7,8 @@ from pydantic import BaseModel, Field
 class HealthResponse(BaseModel):
     """Health check response schema."""
     status: str = Field(default="healthy", description="Application health status")
+    app: str = Field(default="RetailIQ", description="Application name")
+    track_id: str = Field(default="PS03", description="Hackathon track identifier")
 
 
 class StatusResponse(BaseModel):

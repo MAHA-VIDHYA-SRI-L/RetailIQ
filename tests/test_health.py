@@ -21,11 +21,13 @@ class TestHealthEndpoints(unittest.TestCase):
         self.assertEqual(data.get("track"), "PS03")
 
     def test_health_endpoint(self) -> None:
-        """Test GET /health returns 200 and status healthy."""
+        """Test GET /health returns 200 and status healthy with app and track identification."""
         response = self.client.get("/health")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(data.get("status"), "healthy")
+        self.assertEqual(data.get("app"), "RetailIQ")
+        self.assertEqual(data.get("track_id"), "PS03")
 
 
 if __name__ == "__main__":

@@ -39,7 +39,7 @@ if (DIST_DIR / "assets").exists():
 @app.get("/health", response_model=HealthResponse)
 async def health() -> HealthResponse:
     """Health check endpoint."""
-    return HealthResponse(status="healthy")
+    return HealthResponse(status="healthy", app=APP_NAME, track_id=TRACK_ID)
 
 
 @app.get("/", response_model=None)
