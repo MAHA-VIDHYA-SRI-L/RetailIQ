@@ -1,360 +1,404 @@
 TRACK_ID=PS03
 
-# RetailIQ
+# RetailIQ — Evidence-First Sales & Inventory Copilot
 
-## Evidence-First Sales & Inventory Copilot
+<div align="center">
 
-A reliable, evidence-backed retail intelligence copilot combining deterministic Python analytics with Google Gemini natural-language understanding. RetailIQ empowers retail managers and inventory planners to answer business questions, detect stock-out risks, optimize replenishment, and monitor sales trends—with every recommendation grounded in verified data.
+[![Track](https://img.shields.io/badge/Hackathon_Track-PS03_Retail_Copilot-0ea5e9?style=for-the-badge)](https://github.com/MAHA-VIDHYA-SRI-L/RetailIQ)
+[![Python](https://img.shields.io/badge/Python-3.11+-3776ab?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
+[![React](https://img.shields.io/badge/React-18.3_TypeScript-61dafb?style=for-the-badge&logo=react&logoColor=black)](https://reactjs.org/)
+[![Tests](https://img.shields.io/badge/Tests-99%2F99_Passing-10b981?style=for-the-badge&logo=pytest&logoColor=white)](https://docs.pytest.org/)
+[![License](https://img.shields.io/badge/License-MIT-gray?style=for-the-badge)](LICENSE)
 
----
+**An evidence-grounded AI copilot bridging natural-language interaction with deterministic retail intelligence.**
 
-## 1. Problem
+*Built for retail operators, inventory planners, and regional managers.*
 
-Retail operators face fragmented sales receipts, complex inventory spreadsheets, and siloed store reports:
-
-* **Stock-Out Uncertainty**: High-velocity products frequently run out of stock before reorder triggers are identified, causing lost revenue.
-* **Capital Trapped in Overstock**: Excess inventory sits in warehouses for months, tying up operating capital and risking obsolescence.
-* **Manual Data Crunching**: Calculating daily velocity, days of coverage, and store-by-store sales trends across dozens of SKUs requires tedious spreadsheet work.
-* **Unreliable Generative AI**: Generic AI dashboards often hallucinate numbers or invent metrics, making them dangerous for business-critical inventory decisions.
-
----
-
-## 2. Proposed Solution
-
-**RetailIQ** provides an evidence-first sales and inventory copilot that bridges natural-language interaction with deterministic retail computation:
-
-* **Conversational Interface**: Retail managers ask questions in plain English (*"Which products are likely to run out soon?"*, *"Which store generated the most revenue?"*).
-* **Deterministic Calculation**: Business metrics—revenue, units sold, average daily sales, inventory coverage, target stock, and reorder quantities—are computed exclusively in Python.
-* **Evidence-Backed Explanations**: Google Gemini synthesizes explanations strictly from verified analytical evidence tables.
-* **Operational Decision Support**: Prioritized attention feeds flag critical stockouts, overstock capital, sales surges, and sales drops automatically.
+</div>
 
 ---
 
-## 3. Why RetailIQ?
+> [!IMPORTANT]
+> **Core Architectural Principle**
+> 
+> **Gemini understands and explains. Python calculates. Evidence proves.**
+> 
+> Business-critical metrics (revenue, unit velocity, days of inventory coverage, stockout risk levels, and replenishment quantities) are **never calculated by the LLM**. Every narrative response is synthesized strictly from deterministic analytical evidence tables produced by Python and SQLite.
 
-RetailIQ addresses the fundamental flaw of applying LLMs to quantitative business operations:
+---
+
+## Executive Summary
+
+Retail operations generate massive amounts of daily transaction receipts and inventory snapshots across distributed physical store locations. However, translating raw data into timely replenishment and merchandising actions remains manual, error-prone, and slow.
+
+**RetailIQ** solves this challenge by pairing Google Gemini natural-language understanding with a deterministic Python calculation engine. Store managers can ask unstructured questions in plain English—from stock-out alerts to regional revenue comparisons—and receive grounded, auditable answers backed by verifiable mathematical evidence.
+
+---
+
+## Table of Contents
+
+1. [Problem Statement](#1-problem-statement)
+2. [The RetailIQ Solution](#2-the-retailiq-solution)
+3. [The Evidence-First Paradigm](#3-the-evidence-first-paradigm)
+4. [System Architecture](#4-system-architecture)
+5. [The AI-Deterministic Boundary](#5-the-ai-deterministic-boundary)
+6. [Core Functional Modules](#6-core-functional-modules)
+   - [Sales Intelligence](#sales-intelligence)
+   - [Inventory Intelligence](#inventory-intelligence)
+   - [Unified Attention Feed](#unified-attention-feed)
+   - [Interactive AI Copilot](#interactive-ai-copilot)
+7. [Inventory Mathematics & Risk Matrix](#7-inventory-mathematics--risk-matrix)
+8. [Ambiguity & Boundary Handling](#8-ambiguity--boundary-handling)
+9. [Dataset Specification](#9-dataset-specification)
+10. [REST API Reference](#10-rest-api-reference)
+11. [Validated Demo Scenarios](#11-validated-demo-scenarios)
+12. [Security, Safety & Reliability](#12-security-safety--reliability)
+13. [Installation & Getting Started](#13-installation--getting-started)
+14. [Evaluation & Test Suite](#14-evaluation--test-suite)
+15. [Future Roadmap](#15-future-roadmap)
+16. [Project & Hackathon Metadata](#16-project--hackathon-metadata)
+
+---
+
+## 1. Problem Statement
+
+Modern multi-store retail management suffers from three systemic operational challenges:
 
 ```text
-Standard AI Analytics (High Hallucination Risk):
-Question ──► LLM Hallucinates Calculation ──► Unreliable Answer
-
-RetailIQ Evidence-First Architecture (Safe & Auditable):
-Question
-   │
-   ▼
-Intent & Entity Resolution (Gemini NLU + Database Validation)
-   │
-   ▼
-Deterministic Analytics Engine (Python + SQLite Calculations)
-   │
-   ▼
-Verified Evidence Layer (Exact Numbers, Coverage Days, Reorder Qty)
-   │
-   ▼
-Gemini Explanation Layer (Synthesizes Language Strictly from Evidence)
-   │
-   ▼
-Actionable, Grounded Answer + Interactive Evidence Panel
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           The Retail Analytics Gap                          │
+├─────────────────────────┬─────────────────────────┬─────────────────────────┤
+│    Stock-Out Risks      │   Overstock Capital     │    Unreliable AI Tools  │
+├─────────────────────────┼─────────────────────────┼─────────────────────────┤
+│ Fast-moving bestsellers │ Slow-moving inventory   │ Generic LLMs invent or  │
+│ run dry unnoticed       │ ties up working capital │ hallucinate metrics     │
+│ before purchase orders  │ and incurs holding fees │ without database ground │
+│ are dispatched.         │ without demand signals. │ truth or audit trails.  │
+└─────────────────────────┴─────────────────────────┴─────────────────────────┘
 ```
 
-> **Core Principle**: *Gemini understands and explains. Python calculates. Evidence proves.*
+* **Fragmented Transaction Records**: Point-of-sale data sits across store-specific silos, making regional velocity comparisons difficult.
+* **Complex Multi-Variable Mathematics**: Accurately calculating daily sales velocity, safety stock, target stock, and reorder levels across dozens of SKUs requires complex manual spreadsheet work.
+* **The "Black Box" LLM Trap**: Conventional conversational dashboards pass raw prompts directly to LLMs, which frequently fabricate numbers, assume fictitious dates, and make unverified inventory claims.
 
 ---
 
-## 4. Key Capabilities
+## 2. The RetailIQ Solution
 
-### Sales Intelligence
-* **Sales Summaries**: Total revenue, units sold, transaction counts, and average daily revenue over arbitrary or predefined date windows.
-* **Product Performance**: SKU-level revenue, unit volume, selling days, and average daily velocity.
-* **Store Comparison**: Regional revenue and volume rankings across physical store locations.
-* **Category Breakdown**: Category share, revenue contribution, and volume mix.
-* **Daily Sales Trends**: Time-series revenue tracking with baseline anomaly detection.
+RetailIQ provides an **auditable, evidence-first copilot platform** designed for day-to-day retail execution:
 
-### Inventory Intelligence
-* **Stock-Out Risk Detection**: Real-time identification of items below critical inventory coverage thresholds.
-* **Coverage Estimation**: Days of coverage calculated from recent 30-day demand velocity.
-* **Deterministic Reorder Sizing**: Target stock and replenishment unit recommendations based on lead-time coverage.
-* **Overstock Detection**: Identification of excess inventory (>45 days coverage) and capital locked in idle stock.
-* **Velocity Classification**: Product segmentation into Fast, Medium, and Slow moving tiers.
-* **Prioritized Attention Feed**: Unified alerts ranking stockouts, overstocks, demand surges, and sales drops by urgency.
-
-### AI Copilot
-* **Natural-Language Understanding**: Zero-shot question routing powered by Gemini structured JSON classification.
-* **Entity Resolution**: Resilient catalog matching against products and stores.
-* **Ambiguity Handling**: Proactive clarification when queries match multiple items.
-* **Offline Fallback**: Rule-based classifier and deterministic templating guarantee operation even if external AI is unavailable.
+* **Conversational Simplicity**: Operators ask questions in natural language (*"Which products are likely to run out soon?"*, *"Which store generated the most revenue?"*).
+* **Deterministic Execution**: Calculations are carried out by strict, deterministic Python engines directly against SQLite databases.
+* **Grounded Synthesis**: Gemini translates verified numerical results into executive summaries without hallucinating calculations.
+* **Dual Representation**: Every answer in the UI includes both a natural-language executive briefing and an expandable **Evidence Panel** displaying exact database records, applied assumptions, and formulas.
 
 ---
 
-## 5. How It Works
+## 3. The Evidence-First Paradigm
 
-1. **User Question**: A retail operator enters a natural-language inquiry.
-2. **Intent & Entity Extraction**: The query is parsed into a `StructuredIntent` containing the analytics type, matched product ID, store ID, and date boundaries.
-3. **Deterministic Execution**: The intent routes to Python analytics functions that query the SQLite database using parameterized queries.
-4. **Evidence Construction**: Computed values are structured into an audit table containing current stock, average daily sales, coverage days, and formulas.
-5. **Grounded Explanation**: Gemini generates a clear narrative explanation derived strictly from the evidence metrics.
-6. **Delivery**: The user receives a structured answer alongside interactive evidence tables, assumptions, and recommended actions.
+RetailIQ enforces a fundamental architectural departure from conventional generative analytics tools:
+
+```text
+Traditional Conversational BI (High Hallucination Risk):
+User Question ──────► LLM Attempts Numerical Calculation ──────► Unverified / Invented Output
+
+RetailIQ Evidence-First Pipeline (Deterministic & Auditable):
+User Question
+      │
+      ▼
+Intent & Entity Resolution ──► Gemini NLU + Local Catalog Matching
+      │
+      ▼
+Deterministic Engine       ──► Parameterized SQL Aggregation in Python (Zero LLM Math)
+      │
+      ▼
+Evidence Construction      ──► Exact Proof Payload (Stock, ADS, Coverage, Reorder Qty)
+      │
+      ▼
+Grounded AI Synthesis      ──► Gemini Formulates Briefing Strictly from Evidence Payload
+      │
+      ▼
+Grounded Decision Briefing ──► Answer + Interactive Evidence Drawer + Quantified Recommendations
+```
 
 ---
 
-## 6. System Architecture
+## 4. System Architecture
+
+RetailIQ is organized into a clean, decoupled full-stack architecture:
 
 ```mermaid
 flowchart TD
-    User([Retail Operator]) <--> UI[React 18 SPA Dashboard]
-    UI <--> API[FastAPI Application]
-    
-    subgraph Backend [FastAPI Backend]
-        API --> Copilot[Copilot Orchestration Engine]
-        API --> AnalyticsAPI[Analytics & Inventory Endpoints]
-        
-        Copilot --> IntentLayer[Intent & Entity Classifier]
-        IntentLayer <--> GeminiAPI[Google Gemini API]
-        IntentLayer --> CatalogVal[Catalog & Entity Matcher]
-        
-        Copilot --> PythonEngine[Deterministic Analytics Engine]
-        AnalyticsAPI --> PythonEngine
-        
-        PythonEngine <--> SQLite[(SQLite Database / CSVs)]
-        PythonEngine --> EvidenceBuilder[Evidence Builder]
-        
-        EvidenceBuilder --> GroundingCheck[Evidence Verification Layer]
-        GroundingCheck <--> GeminiAPI
+    subgraph ClientLayer ["Client Layer (Web Application)"]
+        Operator([Retail Operator]) <--> UI[React 18 TypeScript Dashboard]
+        UI <--> Drawer[Interactive Copilot Slide-over Panel]
     end
-    
-    GroundingCheck --> UI
+
+    subgraph ServiceLayer ["Application & API Layer (FastAPI)"]
+        UI <--> HTTPRouter[FastAPI HTTP API Router]
+        HTTPRouter --> StaticMount[Production SPA Static Mount]
+        HTTPRouter --> AnalyticsRoutes[/api/analytics/*]
+        HTTPRouter --> InventoryRoutes[/api/inventory/*]
+        HTTPRouter --> CopilotRoute[POST /api/copilot]
+    end
+
+    subgraph OrchestrationLayer ["Orchestration & Intelligence Layer"]
+        CopilotRoute --> CopilotOrch[Retail Copilot Orchestrator]
+        CopilotOrch <--> IntentClassifier[Intent Classifier & Entity Resolver]
+        IntentClassifier <--> GeminiClient[Gemini API Client]
+        CopilotOrch --> EngineRouter{Intent Router}
+    end
+
+    subgraph DeterministicEngine ["Deterministic Calculation Engine (Python)"]
+        EngineRouter --> SalesEngine[Sales Analytics Engine]
+        EngineRouter --> InvEngine[Inventory Intelligence Engine]
+        AnalyticsRoutes --> SalesEngine
+        InventoryRoutes --> InvEngine
+        
+        SalesEngine <--> SQLite[(Local SQLite Database / CSVs)]
+        InvEngine <--> SQLite
+        
+        SalesEngine --> EvidenceBuilder[Evidence Payload Builder]
+        InvEngine --> EvidenceBuilder
+    end
+
+    subgraph GroundingLayer ["Grounding & Delivery"]
+        EvidenceBuilder --> GroundedPayload[Structured Evidence Payload]
+        GroundedPayload --> GroundingVerification{Grounded Verification}
+        GroundingVerification <--> GeminiClient
+        GroundingVerification --> FinalResponse[Structured Copilot Response]
+        FinalResponse --> UI
+    end
 ```
 
 ---
 
-## 7. Evidence-First Architecture
+## 5. The AI-Deterministic Boundary
 
-In RetailIQ, **evidence** is not an afterthought—it is the structural foundation of every response:
+RetailIQ enforces strict role separation between natural-language understanding and business computation:
 
-* **Answer**: Natural-language explanation grounded in data.
-* **Evidence**: The raw, verifiable numbers produced by Python (e.g. `current_stock=12`, `ADS=4.37`, `days_of_coverage=2.75`).
-* **Assumptions**: Transparent calculation rules (e.g. *"Demand window: 30 days"*, *"Target coverage: 21 days"*).
-* **Recommendations**: Quantified operational actions (e.g. *"Reorder 80 units for Indiranagar"*).
-* **Data Status**: Explicit flags (`complete`, `incomplete`, `no_data`, `ambiguous`, `unavailable`).
-
-> RetailIQ reduces hallucination risk by separating numerical computation from language generation and grounding explanations in verified evidence.
-
----
-
-## 8. AI + Deterministic Intelligence
-
-The application enforces a strict operational boundary between language processing and business computation:
-
-| Responsibility | Technology | Implementation |
+| Operational Responsibility | Assigned Technology | Guarantees & Enforcement |
 | :--- | :--- | :--- |
-| **Natural-Language Understanding** | Google Gemini API | Translates user questions into structured analytical parameters |
-| **Intent Extraction** | Gemini / Python Fallback | Generates structured JSON schema with confidence scoring |
-| **Entity Resolution** | Python + SQLite | Matches product names, aliases, store cities, and ISO dates |
-| **Revenue & Sales Metrics** | Python | Calculates `revenue = quantity * unit_price` deterministically |
-| **Sales Aggregation** | Python + SQLite | Parameterized SQL aggregation across dates, stores, and categories |
-| **Growth & Comparison** | Python | Computes period-over-period percentage changes |
-| **Average Daily Sales (ADS)** | Python | Computes rolling 30-day demand velocity |
-| **Inventory Coverage** | Python | Computes `Current Stock / ADS` |
-| **Stock-Out Risk Level** | Python | Evaluates coverage thresholds (`CRITICAL`, `HIGH`, `MEDIUM`) |
-| **Reorder Sizing** | Python | Computes `max(0, Target Stock - Current Stock)` |
-| **Evidence Formulation** | Python | Assembles structured data payloads for verification |
-| **Final Narrative Explanation** | Google Gemini API | Explains verified metrics in human terms based on evidence |
+| **Natural Language Understanding** | Google Gemini API (`gemini-1.5-flash`) | Zero-shot intent classification into typed schema. |
+| **Intent & Confidence Scoring** | Gemini + Python Fallback | Fallback to deterministic regex/keyword heuristics if offline. |
+| **Entity Resolution & Validation** | Python + SQLite Catalog | Validates SKU IDs, product names, aliases, and store locations. |
+| **Ambiguity Detection** | Python Algorithm | Detects multi-product matches (e.g. *"headphones"*) and requests clarification. |
+| **Revenue Calculation** | Python Deterministic Math | Exact line-item computation: $\text{Revenue} = \text{Quantity} \times \text{Unit Price}$. |
+| **Sales Aggregation** | Python + SQLite | Parameterized SQL sums, daily velocity, and period comparisons. |
+| **Average Daily Sales (ADS)** | Python | Rolling 30-day demand velocity calculation. |
+| **Inventory Coverage** | Python | Safe zero-division computation: $\text{Current Stock} / \text{ADS}$. |
+| **Stockout Risk Classification** | Python | Categorization into `CRITICAL`, `HIGH`, `MEDIUM`, and `LOW`. |
+| **Target Stock & Reorder Sizing** | Python | Quantitative formula: $\max(0, \text{Target Stock} - \text{Current Stock})$. |
+| **Evidence Formulation** | Python | Packages computed numerical proofs into auditable evidence tables. |
+| **Executive Synthesis & Narrative** | Google Gemini API | Explains verified results in natural English based exclusively on evidence. |
 
-**Key Rule**: The LLM does not become the source of truth for numerical business decisions.
-
----
-
-## 9. Inventory Intelligence
-
-All inventory calculations follow transparent, industry-standard retail mathematics:
-
-```text
-Average Daily Sales (ADS) = Units Sold in Demand Window / Number of Days (30)
-
-Inventory Coverage = Current Stock / Average Daily Sales
-
-Target Stock = round(Average Daily Sales × Target Coverage Days)
-
-Reorder Quantity = max(0, Target Stock - Current Stock)
-```
-
-### Risk Classification Thresholds
-* **CRITICAL**: Days of Coverage $\le 3.0$ days (Immediate stockout risk).
-* **HIGH**: Days of Coverage $\le 7.0$ days (Replenishment required this week).
-* **MEDIUM**: Days of Coverage $\le 14.0$ days (Monitor during normal cycle).
-* **LOW / HEALTHY**: Days of Coverage $> 14.0$ days (Adequate safety stock).
-* **OVERSTOCK**: Days of Coverage $> 45.0$ days (Excess inventory tying up capital).
+> [!NOTE]
+> Under no circumstance is Gemini permitted to compute arithmetic, aggregate financial sums, or extrapolate ungrounded stock levels.
 
 ---
 
-## 10. Handling Ambiguity & Missing Data
+## 6. Core Functional Modules
 
-RetailIQ avoids arbitrary guessing:
-
-* **Ambiguous Products**: When a query matches multiple items (e.g., *"How are the headphones doing?"* matches both *Noise-Cancelling Wireless Earbuds* and *Bluetooth Soundbar*), the system returns `needs_clarification=true` with `data_status="ambiguous"` and prompts the user to select the specific product.
-* **Unknown Entities**: Non-existent products (*"How is XYZ Ultra Phone performing?"*) or stores (*"Store 999"*) return `data_status="no_data"` explaining the item was not found.
-* **Out-of-Dataset Dates**: Queries for dates outside data boundaries (*"Show sales from January 2030"*) return explicit `no_data` responses without fabricating metrics.
-* **Fault-Tolerant AI Handling**: If the Gemini API is unreachable, times out, or receives no API key, the system gracefully falls back to deterministic rule-based classifications and structured template answers.
-
----
-
-## 11. Technology Stack
-
-* **Backend Framework**: Python 3.11, FastAPI, Uvicorn
-* **Database & Processing**: SQLite (Local embedded database), Pandas, NumPy
-* **Generative AI**: Google Gemini API (`gemini-1.5-flash` via HTTP / official SDK)
-* **Frontend**: React 18, TypeScript, Vite, Lucide React icons, Vanilla CSS Design System
-* **Validation & Testing**: Pydantic v2, Pytest, HTTPX
-
----
-
-## 12. Dataset
-
-RetailIQ includes an internally consistent, synthetic retail dataset:
-
-* **Products (`data/products.csv`)**: 40 products across 6 categories (Electronics, Accessories, Home, Personal Care, Office, Grocery) with realistic INR prices (₹179 to ₹3,499).
-* **Stores (`data/stores.csv`)**: 4 metropolitan retail locations (Bengaluru, Mumbai, Delhi, Hyderabad).
-* **Sales (`data/sales.csv`)**: 11,119 transaction records spanning 120 days (2026-05-08 to 2026-09-04). Total recorded revenue: ₹34,099,044.00.
-* **Inventory (`data/inventory.csv`)**: 160 store-product records with calibrated stock levels and reorder thresholds.
-* **Integrity**: 100% verified consistency (`revenue == quantity * unit_price`, 0 mismatches across 11,119 records).
-
----
-
-## 13. Project Structure
-
-```text
-RetailIQ/
-├── app.py                      # FastAPI server & static SPA mount
-├── requirements.txt            # Python dependencies
-├── README.md                   # Hackathon submission documentation
-├── .gitignore                  # Git exclusions (.env, caches, node_modules)
-│
-├── src/                        # Core application package
-│   ├── config.py               # Constants, thresholds, environment configuration
-│   ├── database.py             # SQLite connection management & CSV loader
-│   ├── models.py               # Pydantic schemas and API contracts
-│   ├── analytics.py            # Deterministic sales analytics engine
-│   ├── inventory.py            # Deterministic inventory intelligence engine
-│   ├── gemini_client.py        # Safe Google Gemini client wrapper
-│   ├── intent.py               # Intent classification & entity matching
-│   ├── evidence.py             # Structured evidence builder
-│   ├── copilot.py              # Retail copilot orchestration pipeline
-│   └── api.py                  # Modular FastAPI router endpoints
-│
-├── data/                       # Synthetic retail datasets & SQLite database
-│   ├── products.csv            # 40 retail products
-│   ├── stores.csv              # 4 store locations
-│   ├── sales.csv               # 11,119 sales transactions
-│   ├── inventory.csv           # 160 inventory records
-│   └── retailiq.db             # Local SQLite database
-│
-├── frontend/                   # React 18 + TypeScript SPA
-│   ├── src/                    # UI source code, pages, and components
-│   └── dist/                   # Production build served by FastAPI
-│
-├── tests/                      # Pytest automated test suite (99 tests)
-│   ├── test_analytics.py       # Sales analytics calculations
-│   ├── test_inventory.py       # Inventory coverage and reorder math
-│   ├── test_copilot.py         # End-to-end copilot orchestration & fallbacks
-│   ├── test_gemini.py          # Gemini client error handling & parsing
-│   ├── test_data.py            # Dataset integrity & schema validations
-│   ├── test_database.py        # SQLite queries & loader tests
-│   ├── test_health.py          # Health & root endpoints
-│   └── test_frontend_serving.py# Production SPA file serving tests
-│
-└── scripts/                    # Utilities & verification scripts
-    └── validate_hackathon_demo.py # Automated end-to-end evaluation script
-```
-
----
-
-## 14. API Overview
-
-### Sales Analytics
-* `GET /api/analytics/summary`: Aggregate revenue, units, transactions, and daily averages.
-* `GET /api/analytics/trend`: Chronological daily revenue time-series data.
-* `GET /api/analytics/top-products`: Ranked products by revenue or unit sales.
-* `GET /api/analytics/categories`: Category revenue contributions and percentages.
-* `GET /api/analytics/products/{product_id}`: Single product sales performance.
-* `GET /api/analytics/stores/{store_id}`: Store-level performance metrics.
+### Sales Intelligence
+* **Portfolio Sales Overview**: Live monitoring of gross revenue, total units sold, transaction count, and average order value.
+* **Daily Sales Trend**: Chronological 120-day time-series tracking with peak volume highlighting and baseline anomaly tracking.
+* **Top Performing Products**: SKU revenue and unit rankings filtered across 6 major retail categories.
+* **Regional Store Comparison**: Store-by-store volume and revenue contribution benchmarking across physical metropolitan locations.
+* **Period-over-Period Comparison**: Growth/decline tracking between customized or predefined date ranges.
 
 ### Inventory Intelligence
-* `GET /api/inventory/health`: Portfolio health overview, risk distribution, and stock value.
-* `GET /api/inventory/risks`: Stock-out risks sorted by coverage urgency.
-* `GET /api/inventory/overstock`: Items exceeding 45 days coverage with locked capital.
-* `GET /api/inventory/attention`: Prioritized operational feed.
-* `GET /api/inventory/velocity`: Segmentation into Fast, Medium, and Slow tiers.
-* `GET /api/inventory/{product_id}`: Store-by-store inventory and reorder recommendations.
+* **Stock-Out Risk Engine**: Real-time identification of inventory below critical demand thresholds.
+* **Coverage Days Tracking**: Continuous evaluation of on-hand inventory duration based on rolling daily velocity.
+* **Overstock Detection**: Automatic flagging of items with $>45$ days of coverage and computation of idle capital.
+* **Velocity Classification**: ABC segmentation into Fast-moving ($>5$ units/day), Medium-moving ($1-5$ units/day), and Slow-moving ($<1$ unit/day) tiers.
+* **Deterministic Reorder Sizing**: Replenishment recommendations calculated to maintain 21-day target buffer stock.
 
-### AI Copilot & Core
-* `POST /api/copilot`: Natural-language question answering with verified evidence.
-* `POST /api/copilot/intent`: Intent classification and entity resolution.
-* `GET /health`: Service health check (`{"status": "healthy", "app": "RetailIQ", "track_id": "PS03"}`).
+### Unified Attention Feed
+The **Priority Attention Feed** combines multi-dimensional operational signals into a single prioritized queue:
+1. **Critical Stockouts**: Coverage $\le 3.0$ days with high customer demand.
+2. **High Stockouts**: Coverage $\le 7.0$ days requiring supplier replenishment this week.
+3. **Severe Overstocks**: Substantial excess stock tying up working capital.
+4. **Demand Surges & Drops**: Unexpected velocity shifts compared to historical baselines.
 
----
-
-## 15. Example Copilot Questions
-
-Evaluators can test the following validated questions:
-
-1. **Inventory Risk**:
-   > *"Which products are likely to run out soon?"*
-   > Identifies 18 product/store combinations at stockout risk with coverage under 7 days.
-
-2. **Store Comparison**:
-   > *"Which store generated the most revenue?"*
-   > Evaluates all 4 stores; identifies RetailIQ Prime - Indiranagar (₹9.78M) as #1.
-
-3. **Overstock Detection**:
-   > *"Which products are overstocked?"*
-   > Surfaces 36 records with $>45$ days of coverage and quantifies excess capital.
-
-4. **Sales Trend**:
-   > *"Show me the sales trend."*
-   > Returns 120 daily sales points totaling ₹34.10M revenue.
-
-5. **Reorder Recommendations**:
-   > *"What should I reorder?"*
-   > Calculates target stock and exact replenishment units for items at risk.
-
-6. **Category Performance**:
-   > *"How are Electronics performing?"*
-   > Summarizes ₹16.16M revenue (47.38% share of total retail sales).
+### Interactive AI Copilot
+* **Natural-Language Querying**: Interactive slide-over drawer accessible from any dashboard page.
+* **Proactive Quick Questions**: One-click quick prompts for stockout checks, store performance, reorder planning, and trend analysis.
+* **Interactive Evidence Inspector**: Expandable data tables embedded inside each conversational reply.
+* **Assumptions & Recommendations**: Transparent operational guidance detailing the mathematical rules applied.
 
 ---
 
-## 16. Reliability & Security
+## 7. Inventory Mathematics & Risk Matrix
 
-* **API Key Protection**: `GEMINI_API_KEY` is loaded strictly server-side from environment variables; zero API keys are stored in frontend code, git commits, or documentation.
-* **SQL Injection Safety**: 100% of SQLite database queries use parameterized placeholders (`?`). No arbitrary SQL execution endpoints exist.
-* **Input Validation**: Handled via Pydantic v2 schemas; empty, null, or malformed queries return clean HTTP 400/422 responses with zero traceback leakage.
-* **Fault-Tolerant Copilot**: If Gemini is offline, the system seamlessly uses rule-based classification and deterministic templating.
-* **Test Isolation**: All 99 automated tests use mocked Gemini responses and local SQLite data, requiring zero live network calls during automated testing.
+RetailIQ implements standardized, auditable retail inventory logic:
+
+$$\text{Average Daily Sales (ADS)} = \frac{\sum_{i=1}^{N} \text{Units Sold}_i}{\text{Demand Window Days (30)}}$$
+
+$$\text{Days of Coverage} = \frac{\text{Current Stock}}{\text{Average Daily Sales}}$$
+
+$$\text{Target Stock} = \operatorname{round}(\text{Average Daily Sales} \times \text{Target Coverage Days (21)})$$
+
+$$\text{Recommended Reorder Quantity} = \max\left(0, \text{Target Stock} - \text{Current Stock}\right)$$
+
+### Risk Classification Matrix
+
+| Risk Level | Coverage Days Threshold | Operational Meaning | System Action |
+| :--- | :---: | :--- | :--- |
+| **CRITICAL** | $\le 3.0$ days | Imminent stockout within 72 hours | Red alert; immediate priority purchase order |
+| **HIGH** | $\le 7.0$ days | Stockout likely within the current week | Amber alert; include in standard replenishment cycle |
+| **MEDIUM** | $\le 14.0$ days | Buffer stock within acceptable operating band | Monitor during routine review |
+| **LOW / HEALTHY** | $> 14.0$ days | Fully stocked with adequate safety cushion | Normal operation; no action required |
+| **OVERSTOCK** | $> 45.0$ days | Excess inventory tying up operating capital | Pause procurement; consider promotional clearance |
 
 ---
 
-## 17. Getting Started
+## 8. Ambiguity & Boundary Handling
+
+RetailIQ avoids arbitrary guessing or silent assumptions when handling edge cases:
+
+### 1. Ambiguous Product Queries
+* **Scenario**: Operator asks *"How are the headphones doing?"*.
+* **Behavior**: The catalog contains both *Noise-Cancelling Wireless Earbuds* and *Bluetooth Soundbar 40W*.
+* **System Action**: Sets `needs_clarification=True`, assigns `data_status="ambiguous"`, and returns a clarification prompt listing candidate products rather than arbitrarily guessing.
+
+### 2. Unknown Products or Stores
+* **Scenario**: Operator queries *"How is the XYZ Ultra Phone performing?"* or *"Store 999"*.
+* **Behavior**: Entity matcher discovers no matching record in the SQLite database.
+* **System Action**: Returns `data_status="no_data"` stating the entity was not found, with zero hallucinated sales.
+
+### 3. Out-of-Dataset Date Inquiries
+* **Scenario**: Operator queries *"Show sales from January 2030."*.
+* **Behavior**: The query period extends beyond dataset boundaries (`2026-05-08` to `2026-09-04`).
+* **System Action**: Returns `data_status="no_data"` explaining that no sales records exist for the specified timeframe.
+
+### 4. Resilient Offline Operation
+* **Scenario**: The application starts without `GEMINI_API_KEY`, or Gemini API requests time out.
+* **Behavior**: All analytics routes (`/api/analytics/*`, `/api/inventory/*`) continue operating at 100% capacity.
+* **System Action**: The Copilot engages its rule-based keyword classifier and returns structured, deterministic template explanations grounded in evidence.
+
+---
+
+## 9. Dataset Specification
+
+RetailIQ ships with a validated synthetic retail dataset designed to model real-world operational distributions:
+
+* **Products (`data/products.csv`)**: 40 distinct SKUs across 6 categories:
+  * *Electronics* (Mice, Keyboards, Webcams, Earbuds, Soundbars, Power Banks)
+  * *Accessories* (Laptop Stands, Backpacks, USB Hubs, Cables)
+  * *Home* (Desk Lamps, Mugs, Diffusers, Flasks, Bed Sheets)
+  * *Personal Care* (Electric Toothbrushes, Trimmers, Sunscreens)
+  * *Office* (Notebooks, Ergonomic Cushions, File Trays, Wrist Rests)
+  * *Grocery* (Arabica Coffee, Masala Chai, Coconut Oil, Almonds, Rolled Oats)
+* **Store Locations (`data/stores.csv`)**: 4 metropolitan retail hubs:
+  * `STR001`: RetailIQ Prime — Indiranagar, Bengaluru
+  * `STR002`: RetailIQ Hub — Bandra West, Mumbai
+  * `STR003`: RetailIQ Metro — Connaught Place, Delhi
+  * `STR004`: RetailIQ Express — HITEC City, Hyderabad
+* **Transaction History (`data/sales.csv`)**: **11,119 verified transaction records** spanning 120 days (`2026-05-08` to `2026-09-04`).
+  * Total Network Revenue: **₹34,099,044.00**
+  * Total Units Sold: **39,226 units**
+* **Inventory State (`data/inventory.csv`)**: **160 SKU-store combinations** with calibrated stock and reorder thresholds.
+  * Verified Mathematical Integrity: $\text{Revenue} = \text{Quantity} \times \text{Unit Price}$ across 100% of rows (0 mismatches).
+
+---
+
+## 10. REST API Reference
+
+### Analytics Endpoints (`/api/analytics`)
+* `GET /api/analytics/summary` — Aggregate portfolio revenue, units, transactions, and daily revenue.
+* `GET /api/analytics/trend` — Chronological daily sales time-series data.
+* `GET /api/analytics/top-products` — Top performing products ranked by revenue or volume.
+* `GET /api/analytics/categories` — Category breakdown with revenue contribution percentages.
+* `GET /api/analytics/products/{product_id}` — Granular sales analytics for a specific SKU.
+* `GET /api/analytics/stores/{store_id}` — Store-level performance metrics.
+
+### Inventory Endpoints (`/api/inventory`)
+* `GET /api/inventory/health` — Inventory valuation, risk distributions, overstock metrics, and percentages.
+* `GET /api/inventory/risks` — Prioritized list of products at stockout risk sorted by coverage urgency.
+* `GET /api/inventory/overstock` — Overstocked records ($>45$ days coverage) with calculated locked capital.
+* `GET /api/inventory/attention` — Operational attention feed merging stockouts, overstock, and velocity anomalies.
+* `GET /api/inventory/velocity` — Product segmentation into Fast, Medium, and Slow tiers.
+* `GET /api/inventory/{product_id}` — Store-by-store inventory and replenishment requirements for a SKU.
+
+### Copilot & System Endpoints
+* `POST /api/copilot` — End-to-end question answering pipeline returning grounded answers and evidence tables.
+* `POST /api/copilot/intent` — Direct natural-language intent classification and entity resolution.
+* `GET /health` — Service health check identifying application status, name, and hackathon track.
+
+---
+
+## 11. Validated Demo Scenarios
+
+The following representative questions have been verified against the live RetailIQ engine:
+
+```text
+1. Stock-Out Risk Detection:
+   Q: "Which products are likely to run out soon?"
+   ► Identified 18 product/store combinations at risk.
+   ► Top Critical Risk: Braided Nylon USB-C Cable (2m) at Indiranagar (2.75 days coverage).
+
+2. Store Performance Comparison:
+   Q: "Which store generated the most revenue?"
+   ► Evaluated all 4 regional locations.
+   ► #1 Store: RetailIQ Prime - Indiranagar with ₹9,781,501.00 revenue.
+
+3. Overstock Capital Analysis:
+   Q: "Which products are overstocked?"
+   ► Identified 36 overstocked records tying up ₹837,200.00 in excess capital.
+   ► Top Item: Ultrasonic Aroma Diffuser & Humidifier (61.4 days coverage).
+
+4. Sales Trend Monitoring:
+   Q: "Show me the sales trend."
+   ► Aggregated 120 chronological daily sales points totaling ₹34,099,044.00.
+
+5. Inventory Replenishment:
+   Q: "What should I reorder?"
+   ► Reorder Sizing: Quantified replenishment for items at risk to achieve 21-day target buffer.
+
+6. Category Contribution:
+   Q: "How are Electronics performing?"
+   ► Electronics: ₹16,155,170.00 revenue (9,630 units sold; 47.38% network share).
+```
+
+---
+
+## 12. Security, Safety & Reliability
+
+* **Zero Committed Secrets**: `GEMINI_API_KEY` is loaded strictly server-side from environment variables. Audited with `git grep "AIza"` (0 occurrences).
+* **SQL Injection Immunity**: 100% of SQLite database interactions utilize parameterized placeholders (`?`). No arbitrary SQL execution endpoints exist.
+* **Input Validation & Sanitization**: Enforced via Pydantic v2 schemas; empty, null, or malformed queries return clean HTTP 400/422 responses with zero traceback leakage.
+* **React Error Boundary**: The frontend is wrapped in a top-level error boundary to ensure runtime rendering errors present recovery options rather than a blank screen.
+* **Offline Test Isolation**: All 99 automated tests execute with mocked Gemini responses and local SQLite data, requiring zero external internet access.
+
+---
+
+## 13. Installation & Getting Started
 
 ### Prerequisites
 * Python 3.11+
-* Optional: Google Gemini API Key (for live AI explanations; deterministic analytics work without it)
+* Node.js 18+ (Only required if rebuilding the frontend; pre-compiled production assets are included)
+* Optional: Google Gemini API Key (for live narrative synthesis; deterministic analytics work without it)
 
-### Quick Start
+### Quick Start (2-Step Execution)
 
 ```bash
 # 1. Clone repository
 git clone https://github.com/MAHA-VIDHYA-SRI-L/RetailIQ.git
 cd RetailIQ
 
-# 2. Install dependencies
+# 2. Install Python dependencies
 pip install -r requirements.txt
 
-# 3. (Optional) Set Gemini API Key
-export GEMINI_API_KEY="your_api_key_here"   # Linux/macOS
-set GEMINI_API_KEY="your_api_key_here"      # Windows CMD
-$env:GEMINI_API_KEY="your_api_key_here"     # Windows PowerShell
+# 3. (Optional) Configure Gemini API Key
+# Linux / macOS:
+export GEMINI_API_KEY="your_api_key_here"
+# Windows PowerShell:
+$env:GEMINI_API_KEY="your_api_key_here"
+# Windows Command Prompt:
+set GEMINI_API_KEY="your_api_key_here"
 
-# 4. Start RetailIQ
+# 4. Launch Application
 python app.py
 ```
 
@@ -365,43 +409,57 @@ http://localhost:8000
 
 ---
 
-## 18. Demo Flow
+## 14. Evaluation & Test Suite
 
-A recommended 2-minute evaluation walk-through:
+RetailIQ includes an automated test suite verifying every component from database transactions to copilot orchestration:
 
-1. **Dashboard Overview**: Open `http://localhost:8000` to review total revenue (₹34.10M), inventory risk count, overstock capital, and the 120-day interactive sales trend chart.
-2. **Review Attention Feed**: Inspect top-priority operational alerts showing critical stockouts and overstock items.
-3. **Open Copilot**: Click the **Ask Copilot** button or drawer.
-4. **Test Stockout Query**: Ask *"Which products are likely to run out soon?"*. Observe the AI answer, expand the **Evidence** table, and view the reorder recommendations.
-5. **Test Store Comparison**: Ask *"Which store generated the most revenue?"*. Confirm the ranking is grounded in exact SQLite aggregations.
-6. **Test Ambiguity**: Ask *"How are the headphones doing?"*. Observe that the system asks for clarification rather than guessing.
-7. **Test Date Boundary**: Ask *"Show sales from January 2030."*. Observe that the system reports `no_data` rather than hallucinating numbers.
-
----
-
-## 19. Hackathon Track
-
-```text
-Hackathon Track: PS03 — Retail: Sales and Inventory Copilot
+```bash
+# Run complete test suite
+python -m pytest
 ```
 
-RetailIQ addresses the PS03 track by uniting generative AI with deterministic retail analytics to deliver an auditable, evidence-grounded copilot for retail operations.
+### Verified Test Results
+
+```text
+============================= test session starts =============================
+platform win32 -- Python 3.11.9, pytest-9.1.1, pluggy-1.6.0
+collected 99 items
+
+tests/test_analytics.py ................                                 [ 16%]
+tests/test_copilot.py ........................                           [ 40%]
+tests/test_data.py .................                                     [ 57%]
+tests/test_database.py ........                                          [ 65%]
+tests/test_frontend_serving.py ....                                      [ 69%]
+tests/test_gemini.py ...........                                         [ 80%]
+tests/test_health.py ..                                                  [ 82%]
+tests/test_inventory.py .................                                [100%]
+
+============================= 99 passed in 13.28s =============================
+```
+
+### Automated Live Demonstration Validator
+A dedicated verification script is included to test live server endpoints:
+
+```bash
+python scripts/validate_hackathon_demo.py
+```
 
 ---
 
-## 20. Future Scope
+## 15. Future Roadmap
 
-* **POS Webhook Ingestion**: Direct integration with retail point-of-sale systems for live sub-second event streaming.
-* **Multi-Echelon Supply Chain**: Supplier lead-time variance tracking and multi-warehouse transfer optimization.
-* **Automated Purchase Orders**: Direct EDI/ERP connector integration to draft POs based on verified reorder quantities.
+* **Live POS Webhook Ingestion**: Real-time integration with modern point-of-sale systems for sub-second inventory decrementing.
+* **Supplier Lead-Time Tracking**: Dynamic reorder threshold adjustment based on supplier shipping variances.
+* **Automated Purchase Order Drafts**: Direct EDI/ERP connector integration to draft POs based on verified reorder quantities.
 * **Machine Learning Demand Forecasting**: Seasonal ARIMA/Prophet models incorporated into deterministic Python baselines.
-* **Role-Based Access Control (RBAC)**: Store-manager vs regional-executive permission tiers.
+* **Role-Based Access Control (RBAC)**: Distinct permissions for store associates, store managers, and regional executives.
 
 ---
 
-## 21. Team / Project Information
+## 16. Project & Hackathon Metadata
 
-* **Project**: RetailIQ — Evidence-First Sales & Inventory Copilot
-* **Track ID**: PS03
+* **Project Name**: RetailIQ — Evidence-First Sales & Inventory Copilot
+* **Hackathon Track**: `PS03 — Retail: Sales and Inventory Copilot`
 * **Repository**: [https://github.com/MAHA-VIDHYA-SRI-L/RetailIQ](https://github.com/MAHA-VIDHYA-SRI-L/RetailIQ)
-* **License**: MIT
+* **Architecture Style**: Evidence-First Deterministic Copilot
+* **License**: [MIT License](LICENSE)
