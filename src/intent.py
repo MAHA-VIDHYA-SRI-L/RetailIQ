@@ -168,23 +168,42 @@ class IntentClassifier:
         end_date = raw_end
         note = None
 
-        # Detect relative date expressions in user query
-        if "this month" in q_lower or "current month" in q_lower or "september" in q_lower:
-            start_date = "2026-09-01"
-            end_date = max_date_str
-            note = f"Mapped to available September data ({start_date} to {end_date}; month is partial)."
-        elif "last month" in q_lower or "previous month" in q_lower or "august" in q_lower:
-            start_date = "2026-08-01"
-            end_date = "2026-08-31"
-            note = "Mapped to complete previous month of August (2026-08-01 to 2026-08-31)."
-        elif "today" in q_lower:
-            start_date = max_date_str
-            end_date = max_date_str
-            note = f"Mapped to latest transaction date in dataset ({max_date_str})."
-        elif "past 30 days" in q_lower or "last 30 days" in q_lower or "recent" in q_lower:
-            start_date = (dt_max - timedelta(days=29)).isoformat()
-            end_date = max_date_str
-            note = f"Mapped to 30-day demand window ({start_date} to {end_date})."
+        # Extract explicit ISO YYYY-MM-DD dates if not already extracted
+        if not start_date and not end_date:
+            explicit_dates = re.findall(r"\b(\d{4}-\d{2}-\d{2})\b", raw_query)
+            if len(explicit_dates) >= 2:
+                start_date, end_date = explicit_dates[0], explicit_dates[1]
+                note = f"Extracted date range: {start_date} to {end_date}."
+            elif len(explicit_dates) == 1:
+                start_date, end_date = explicit_dates[0], explicit_dates[0]
+                note = f"Extracted date: {start_date}."
+
+        # Detect relative date expressions in user query if still unresolved
+        if not start_date or not end_date:
+            if "this month" in q_lower or "current month" in q_lower or "september" in q_lower:
+                start_date = "2026-09-01"
+                end_date = max_date_str
+                note = f"Mapped to available September data ({start_date} to {end_date}; month is partial)."
+            elif "last month" in q_lower or "previous month" in q_lower or "august" in q_lower:
+                start_date = "2026-08-01"
+                end_date = "2026-08-31"
+                note = "Mapped to complete previous month of August (2026-08-01 to 2026-08-31)."
+            elif "today" in q_lower:
+                start_date = max_date_str
+                end_date = max_date_str
+                note = f"Mapped to latest transaction date in dataset ({max_date_str})."
+            elif any(w in q_lower for w in ["last 7 days", "past 7 days", "past week", "this week", "last week"]):
+                start_date = (dt_max - timedelta(days=6)).isoformat()
+                end_date = max_date_str
+                note = f"Mapped to 7-day window ({start_date} to {end_date})."
+            elif any(w in q_lower for w in ["last 14 days", "past 14 days", "past 2 weeks"]):
+                start_date = (dt_max - timedelta(days=13)).isoformat()
+                end_date = max_date_str
+                note = f"Mapped to 14-day window ({start_date} to {end_date})."
+            elif any(w in q_lower for w in ["past 30 days", "last 30 days", "recent"]):
+                start_date = (dt_max - timedelta(days=29)).isoformat()
+                end_date = max_date_str
+                note = f"Mapped to 30-day demand window ({start_date} to {end_date})."
 
         return start_date, end_date, note
 
@@ -216,17 +235,18 @@ class IntentClassifier:
         if any(w in q for w in ["inventory health", "warehouse health", "stock status", "inventory status"]):
             return {"intent": "INVENTORY_HEALTH", "confidence": 0.90}
 
-        # 6. Store comparison or which store sells best
-        if any(w in q for w in ["which store sells", "which store performs best", "best store", "compare stores"]):
-            return {"intent": "STORE_COMPARISON", "confidence": 0.92}
+        # 6. Store comparison or which store sells best / most revenue
+        if any(w in q for w in ["which store", "compare stores", "store comparison", "top store", "best store", "store generated the most", "store sells best", "which store sells", "stores perform"]):
+            return {"intent": "STORE_COMPARISON", "confidence": 0.95}
 
         # 7. Trend
         if any(w in q for w in ["trend", "daily sales", "over time", "sales chart", "spike", "drop"]):
             return {"intent": "SALES_TREND", "confidence": 0.90}
 
         # 8. Category performance
-        if any(w in q for w in ["category", "categories", "electronics sales", "grocery sales"]):
-            return {"intent": "CATEGORY_PERFORMANCE", "confidence": 0.90}
+        all_cats = ["electronics", "accessories", "personal care", "grocery", "office", "category", "categories"]
+        if any(w in q for w in all_cats) and any(w in q for w in ["performing", "performance", "sales", "revenue", "how are", "doing", "share"]):
+            return {"intent": "CATEGORY_PERFORMANCE", "confidence": 0.92}
 
         # 9. Product comparison / Top products
         if any(w in q for w in ["top products", "best selling", "most revenue", "compare products", "highest sales"]):
@@ -313,7 +333,7 @@ class IntentClassifier:
             target_product_text = question
 
         target_store_text = raw_store
-        if not target_store_text and raw_intent in ("STORE_PERFORMANCE", "STORE_COMPARISON"):
+        if not target_store_text and raw_intent == "STORE_PERFORMANCE":
             target_store_text = question
 
         target_cat_text = raw_category
@@ -345,11 +365,36 @@ class IntentClassifier:
         elif store_id and raw_intent == "UNKNOWN":
             raw_intent = "STORE_PERFORMANCE"
 
+        # Extract candidate product/store names when not provided by Gemini
+        candidate_prod = raw_product or matched_product
+        if not candidate_prod and raw_intent in ("PRODUCT_PERFORMANCE", "REORDER_RECOMMENDATION"):
+            cleaned = re.sub(
+                r"(?i)\b(how\s+(is|did|are)|performing|performance|perform|doing|selling|sales|this\s+month|today|what\s+about|tell\s+me\s+about|why\s+should\s+i\s+reorder|reorder|how\s+much|what\s+should\s+i|what\s+to|what)\b",
+                "",
+                question,
+            ).strip(" ?.,!")
+            if cleaned.lower() in ("what", "what should i", "what to", "how", "why", "which", "anything", "items", "products", "something", "all", "the", "i"):
+                cleaned = ""
+            if cleaned and len(cleaned) > 1:
+                candidate_prod = cleaned
+
+        candidate_store = raw_store or matched_store
+        if not candidate_store and raw_intent == "STORE_PERFORMANCE":
+            cleaned = re.sub(
+                r"(?i)\b(how\s+(is|did|are)|performing|performance|perform|doing|selling|sales|this\s+month|today|what\s+about|tell\s+me\s+about|which\s+store\s+sells|best|which\s+store\s+generated\s+the\s+most\s+revenue|most\s+revenue|generated|which\s+store)\b",
+                "",
+                question,
+            ).strip(" ?.,!")
+            if cleaned.lower() in ("what", "which", "store", "stores", "the", "all"):
+                cleaned = ""
+            if cleaned and len(cleaned) > 1:
+                candidate_store = cleaned
+
         return StructuredIntent(
             intent=raw_intent,
-            product=matched_product or raw_product,
+            product=matched_product or candidate_prod,
             product_id=product_id,
-            store=matched_store or raw_store,
+            store=matched_store or candidate_store,
             store_id=store_id,
             category=matched_cat,
             start_date=start_date,

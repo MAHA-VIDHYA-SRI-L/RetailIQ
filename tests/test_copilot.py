@@ -22,36 +22,41 @@ class TestRetailCopilotOrchestration(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.client = TestClient(app)
 
-    def _create_mock_copilot(self, gemini_intent=None, gemini_explanation=None):
+    def _create_mock_copilot(self, gemini_intent=None, gemini_explanation=None, simulate_failure: bool = False):
         """Helper to create RetailCopilot instance with mocked Gemini client."""
         mock_gemini = MagicMock(spec=GeminiClient)
-        mock_gemini.is_configured = True
-
-        if gemini_intent:
-            mock_gemini.generate_structured_json.return_value = gemini_intent
+        if simulate_failure:
+            mock_gemini.is_configured = False
+            mock_gemini.generate_structured_json.side_effect = GeminiClientError("Simulated Gemini offline failure")
+            mock_gemini.generate_explanation.side_effect = GeminiClientError("Simulated Gemini offline failure")
         else:
-            mock_gemini.generate_structured_json.return_value = {
-                "intent": "INVENTORY_RISK",
-                "product": None,
-                "store": None,
-                "category": None,
-                "start_date": None,
-                "end_date": None,
-                "confidence": 0.95,
-            }
+            mock_gemini.is_configured = True
 
-        if gemini_explanation:
-            mock_gemini.generate_explanation.return_value = {
-                "explanation": gemini_explanation,
-                "is_available": True,
-                "error": None,
-            }
-        else:
-            mock_gemini.generate_explanation.return_value = {
-                "explanation": "Verified analytics explanation based strictly on evidence.",
-                "is_available": True,
-                "error": None,
-            }
+            if gemini_intent:
+                mock_gemini.generate_structured_json.return_value = gemini_intent
+            else:
+                mock_gemini.generate_structured_json.return_value = {
+                    "intent": "INVENTORY_RISK",
+                    "product": None,
+                    "store": None,
+                    "category": None,
+                    "start_date": None,
+                    "end_date": None,
+                    "confidence": 0.95,
+                }
+
+            if gemini_explanation:
+                mock_gemini.generate_explanation.return_value = {
+                    "explanation": gemini_explanation,
+                    "is_available": True,
+                    "error": None,
+                }
+            else:
+                mock_gemini.generate_explanation.return_value = {
+                    "explanation": "Verified analytics explanation based strictly on evidence.",
+                    "is_available": True,
+                    "error": None,
+                }
 
         copilot = RetailCopilot(gemini_client=mock_gemini)
         return copilot, mock_gemini
@@ -401,6 +406,59 @@ class TestRetailCopilotOrchestration(unittest.TestCase):
             # Missing question field (HTTP 422)
             res_bad = self.client.post("/api/copilot", json={})
             self.assertEqual(res_bad.status_code, 422)
+
+    # 19. Offline Unknown Product Handling
+    def test_19_offline_unknown_product(self) -> None:
+        """Verify unknown product returns clear response without inventing a product when offline."""
+        copilot, _ = self._create_mock_copilot(simulate_failure=True)
+        response = copilot.answer_question("How is XYZ Super Phone performing?")
+        self.assertEqual(response.data_status, "no_data")
+        self.assertIn("XYZ Super Phone", response.answer)
+        self.assertEqual(len(response.evidence), 0)
+
+    # 20. Offline Unknown Store Handling
+    def test_20_offline_unknown_store(self) -> None:
+        """Verify unknown store returns clear response without inventing a store when offline."""
+        copilot, _ = self._create_mock_copilot(simulate_failure=True)
+        response = copilot.answer_question("How is Store 99 performing?")
+        self.assertEqual(response.data_status, "no_data")
+        self.assertIn("Store 99", response.answer)
+        self.assertEqual(len(response.evidence), 0)
+
+    # 21. Relative Date Window (7 days)
+    def test_21_relative_date_window_7_days(self) -> None:
+        """Verify relative window like 'last 7 days' calculates correct boundary."""
+        copilot, _ = self._create_mock_copilot(simulate_failure=True)
+        response = copilot.answer_question("Show sales for the last 7 days.")
+        self.assertIn(response.intent, ["SALES_SUMMARY", "SALES_TREND"])
+        self.assertIn(response.data_status, ["complete", "incomplete"])
+        self.assertGreater(len(response.evidence), 0)
+
+    # 22. Future Date Range
+    def test_22_future_date_range(self) -> None:
+        """Verify future date range like 2030 returns no_data."""
+        copilot, _ = self._create_mock_copilot(simulate_failure=True)
+        response = copilot.answer_question("Show sales from 2030-01-01 to 2030-01-31.")
+        self.assertEqual(response.data_status, "no_data")
+        self.assertIn("No sales data found", response.answer)
+
+    # 23. Category Performance
+    def test_23_category_performance(self) -> None:
+        """Verify category query routes to CATEGORY_PERFORMANCE."""
+        copilot, _ = self._create_mock_copilot(simulate_failure=True)
+        response = copilot.answer_question("How are Electronics performing?")
+        self.assertEqual(response.intent, "CATEGORY_PERFORMANCE")
+        self.assertEqual(response.data_status, "complete")
+        self.assertGreater(len(response.evidence), 0)
+
+    # 24. General Reorder Query
+    def test_24_general_reorder_query(self) -> None:
+        """Verify 'What should I reorder?' is not parsed as product name 'What should I'."""
+        copilot, _ = self._create_mock_copilot(simulate_failure=True)
+        response = copilot.answer_question("What should I reorder?")
+        self.assertEqual(response.intent, "REORDER_RECOMMENDATION")
+        self.assertEqual(response.data_status, "complete")
+        self.assertGreater(len(response.evidence), 0)
 
 
 if __name__ == "__main__":

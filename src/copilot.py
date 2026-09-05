@@ -97,10 +97,10 @@ class RetailCopilot:
             )
 
         # 5. Unknown entity handling
-        if intent_info.product and not intent_info.product_id:
-            # An entity was mentioned by the user that does not exist in the database
+        if (intent_info.product and not intent_info.product_id) or (intent_info.intent == "PRODUCT_PERFORMANCE" and not intent_info.product_id):
+            target_name = intent_info.product or "the specified item"
             return CopilotResponse(
-                answer=f"I couldn't find a product matching '{intent_info.product}' in the available retail data.",
+                answer=f"I couldn't find a product matching '{target_name}' in the available retail data.",
                 intent=intent_info.intent,
                 data_status="no_data",
                 needs_clarification=False,
@@ -109,15 +109,15 @@ class RetailCopilot:
                 recommendations=[],
             )
 
-        if intent_info.store and not intent_info.store_id:
+        if intent_info.store and not intent_info.store_id and intent_info.intent == "STORE_PERFORMANCE":
             return CopilotResponse(
-                answer=f"I couldn't find a store matching '{intent_info.store}' in the available retail data.",
+                answer=f"I couldn't find a store matching '{intent_info.store}' in the available retail data. Please check the store name or city.",
                 intent=intent_info.intent,
                 data_status="no_data",
                 needs_clarification=False,
                 evidence=[],
-                assumptions=[],
-                recommendations=[],
+                assumptions=["Entity verification against store directory failed."],
+                recommendations=["Try querying for Bengaluru, Mumbai, Delhi, or Hyderabad locations."],
             )
 
         # 6. Route to deterministic analytics
@@ -494,11 +494,24 @@ class RetailCopilot:
     def _handle_category_performance(self, question: str, intent: StructuredIntent) -> CopilotResponse:
         res = self.sales.get_category_performance(start_date=intent.start_date, end_date=intent.end_date)
         evidence = res["categories"]
-        top_cat = res["categories"][0] if res["categories"] else None
-        fallback = (
-            f"Category Performance: Total revenue across categories is ₹{res['total_revenue']:,.2f}. "
-            + (f"Leading category is {top_cat['category']} contributing ₹{top_cat['revenue']:,.2f} ({top_cat['revenue_percentage']}% of revenue)." if top_cat else "")
-        )
+
+        if intent.category:
+            matched = next((c for c in res["categories"] if c["category"].lower() == intent.category.lower()), None)
+            if matched:
+                evidence = [matched]
+                fallback = (
+                    f"Category Performance for {matched['category']}: Generated ₹{matched['revenue']:,.2f} in revenue "
+                    f"({matched['units_sold']} units sold), accounting for {matched['revenue_percentage']}% of total catalog revenue."
+                )
+            else:
+                fallback = f"No sales records found for category '{intent.category}'."
+        else:
+            top_cat = res["categories"][0] if res["categories"] else None
+            fallback = (
+                f"Category Performance: Total revenue across categories is ₹{res['total_revenue']:,.2f}. "
+                + (f"Leading category is {top_cat['category']} contributing ₹{top_cat['revenue']:,.2f} ({top_cat['revenue_percentage']}% of revenue)." if top_cat else "")
+            )
+
         explanation = self._get_explanation(
             question=question, intent=intent.intent, metrics=res, evidence=evidence, assumptions=[], period=res.get("period", {}), fallback=fallback
         )
