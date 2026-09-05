@@ -135,43 +135,43 @@ RetailIQ is organized into a clean, decoupled full-stack architecture:
 ```mermaid
 flowchart TD
     subgraph ClientLayer ["Client Layer (Web Application)"]
-        Operator([Retail Operator]) <--> UI[React 18 TypeScript Dashboard]
-        UI <--> Drawer[Interactive Copilot Slide-over Panel]
+        Operator(["Retail Operator"]) <--> UI["React 18 TypeScript Dashboard"]
+        UI <--> Drawer["Interactive Copilot Slide-over Panel"]
     end
 
     subgraph ServiceLayer ["Application & API Layer (FastAPI)"]
-        UI <--> HTTPRouter[FastAPI HTTP API Router]
-        HTTPRouter --> StaticMount[Production SPA Static Mount]
-        HTTPRouter --> AnalyticsRoutes[/api/analytics/*]
-        HTTPRouter --> InventoryRoutes[/api/inventory/*]
-        HTTPRouter --> CopilotRoute[POST /api/copilot]
+        UI <--> HTTPRouter["FastAPI HTTP API Router"]
+        HTTPRouter --> StaticMount["Production SPA Static Mount"]
+        HTTPRouter --> AnalyticsRoutes["/api/analytics/*"]
+        HTTPRouter --> InventoryRoutes["/api/inventory/*"]
+        HTTPRouter --> CopilotRoute["POST /api/copilot"]
     end
 
     subgraph OrchestrationLayer ["Orchestration & Intelligence Layer"]
-        CopilotRoute --> CopilotOrch[Retail Copilot Orchestrator]
-        CopilotOrch <--> IntentClassifier[Intent Classifier & Entity Resolver]
-        IntentClassifier <--> GeminiClient[Gemini API Client]
-        CopilotOrch --> EngineRouter{Intent Router}
+        CopilotRoute --> CopilotOrch["Retail Copilot Orchestrator"]
+        CopilotOrch <--> IntentClassifier["Intent Classifier & Entity Resolver"]
+        IntentClassifier <--> GeminiClient["Gemini API Client"]
+        CopilotOrch --> EngineRouter{"Intent Router"}
     end
 
     subgraph DeterministicEngine ["Deterministic Calculation Engine (Python)"]
-        EngineRouter --> SalesEngine[Sales Analytics Engine]
-        EngineRouter --> InvEngine[Inventory Intelligence Engine]
+        EngineRouter --> SalesEngine["Sales Analytics Engine"]
+        EngineRouter --> InvEngine["Inventory Intelligence Engine"]
         AnalyticsRoutes --> SalesEngine
         InventoryRoutes --> InvEngine
         
-        SalesEngine <--> SQLite[(Local SQLite Database / CSVs)]
+        SalesEngine <--> SQLite[("Local SQLite Database / CSVs")]
         InvEngine <--> SQLite
         
-        SalesEngine --> EvidenceBuilder[Evidence Payload Builder]
+        SalesEngine --> EvidenceBuilder["Evidence Payload Builder"]
         InvEngine --> EvidenceBuilder
     end
 
     subgraph GroundingLayer ["Grounding & Delivery"]
-        EvidenceBuilder --> GroundedPayload[Structured Evidence Payload]
-        GroundedPayload --> GroundingVerification{Grounded Verification}
+        EvidenceBuilder --> GroundedPayload["Structured Evidence Payload"]
+        GroundedPayload --> GroundingVerification{"Grounded Verification"}
         GroundingVerification <--> GeminiClient
-        GroundingVerification --> FinalResponse[Structured Copilot Response]
+        GroundingVerification --> FinalResponse["Structured Copilot Response"]
         FinalResponse --> UI
     end
 ```
