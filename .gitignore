@@ -64,3 +64,8 @@ coverage.xml
 *.swo
 .DS_Store
 Thumbs.db
+
+# Frontend Dependencies
+node_modules/
+frontend/node_modules/
+.vite/

@@ -15,6 +15,7 @@ from src.copilot import RetailCopilot
 from src.analytics import SalesAnalyticsEngine, EntityNotFoundError, InvalidDateRangeError
 from src.inventory import InventoryIntelligenceEngine
 from src.intent import IntentClassifier
+from src.database import get_products, get_stores
 
 router = APIRouter(prefix="/api", tags=["api"])
 copilot = RetailCopilot()
@@ -26,6 +27,18 @@ inventory = InventoryIntelligenceEngine()
 async def api_health() -> HealthResponse:
     """API health status endpoint."""
     return HealthResponse(status="healthy")
+
+
+@router.get("/catalog/products")
+async def list_catalog_products(category: Optional[str] = Query(None)) -> List[Dict[str, Any]]:
+    """Retrieve product catalog for UI selection."""
+    return get_products(category=category)
+
+
+@router.get("/catalog/stores")
+async def list_catalog_stores() -> List[Dict[str, Any]]:
+    """Retrieve store locations for UI selection."""
+    return get_stores()
 
 
 intent_classifier = IntentClassifier()
