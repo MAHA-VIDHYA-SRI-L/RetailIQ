@@ -5,10 +5,12 @@ from fastapi import APIRouter, HTTPException, Query
 from src.models import HealthResponse, CopilotQueryRequest, CopilotQueryResponse
 from src.copilot import RetailCopilot
 from src.analytics import SalesAnalyticsEngine, EntityNotFoundError, InvalidDateRangeError
+from src.inventory import InventoryIntelligenceEngine
 
 router = APIRouter(prefix="/api", tags=["api"])
 copilot = RetailCopilot()
 analytics = SalesAnalyticsEngine()
+inventory = InventoryIntelligenceEngine()
 
 
 @router.get("/health", response_model=HealthResponse)
@@ -164,3 +166,79 @@ async def compare_periods_endpoint(
         raise HTTPException(status_code=404, detail=str(exc))
     except InvalidDateRangeError as exc:
         raise HTTPException(status_code=400, detail=str(exc))
+
+
+# --------------------------------------------------------------------------
+# Deterministic Inventory Intelligence Endpoints
+# --------------------------------------------------------------------------
+
+@router.get("/inventory/health")
+async def get_inventory_health(
+    store_id: Optional[str] = Query(None, description="Optional store filter"),
+) -> Dict[str, Any]:
+    """Retrieve overall inventory health summary, risk distribution, and portfolio metrics."""
+    try:
+        return inventory.get_inventory_health_summary(store_id=store_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get("/inventory/risks")
+async def get_inventory_risks(
+    store_id: Optional[str] = Query(None, description="Optional store filter"),
+    risk_level: Optional[str] = Query(None, description="Filter by exact risk level: CRITICAL, HIGH, MEDIUM"),
+    category: Optional[str] = Query(None, description="Optional category filter"),
+    min_severity: Optional[str] = Query(None, description="Minimum severity filter: CRITICAL, HIGH"),
+) -> List[Dict[str, Any]]:
+    """Retrieve items currently at stock-out risk sorted by urgency."""
+    try:
+        return inventory.get_products_at_risk(
+            store_id=store_id, risk_level=risk_level, category=category, min_severity=min_severity
+        )
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get("/inventory/overstock")
+async def get_inventory_overstock(
+    store_id: Optional[str] = Query(None, description="Optional store filter"),
+    category: Optional[str] = Query(None, description="Optional category filter"),
+    threshold_days: Optional[float] = Query(None, description="Custom overstock coverage threshold in days"),
+) -> List[Dict[str, Any]]:
+    """Retrieve items flagged for overstock with excess inventory and capital estimates."""
+    try:
+        kwargs = {}
+        if threshold_days is not None:
+            kwargs["threshold_days"] = threshold_days
+        return inventory.get_overstocked_products(store_id=store_id, category=category, **kwargs)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get("/inventory/attention")
+async def get_inventory_attention(
+    store_id: Optional[str] = Query(None, description="Optional store filter"),
+    limit: int = Query(15, ge=1, le=50, description="Max attention items to return"),
+) -> List[Dict[str, Any]]:
+    """Retrieve prioritized attention items combining stock-out, overstock, spike, and drop signals."""
+    try:
+        return inventory.get_attention_items(store_id=store_id, limit=limit)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
+
+
+@router.get("/inventory/velocity")
+async def get_inventory_velocity(
+    window_days: Optional[int] = Query(None, description="Historical demand window days"),
+) -> Dict[str, Any]:
+    """Classify products into Fast, Medium, and Slow moving tiers."""
+    return inventory.classify_product_velocities(window_days=window_days)
+
+
+@router.get("/inventory/{product_id}")
+async def get_product_inventory_route(product_id: str) -> Dict[str, Any]:
+    """Retrieve detailed store-level inventory and replenishment recommendations for a product."""
+    try:
+        return inventory.get_product_inventory_detail(product_id=product_id)
+    except EntityNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=str(exc))
