@@ -43,3 +43,12 @@ TARGET_REORDER_COVERAGE_DAYS = float(os.getenv("TARGET_REORDER_COVERAGE_DAYS", "
 # Demand velocity classification thresholds (Network Units / Day over Demand Window)
 VELOCITY_FAST_UNITS_PER_DAY = float(os.getenv("VELOCITY_FAST_UNITS_PER_DAY", "12.0"))  # >= 12.0 units/day network (>= 3 units/store/day)
 VELOCITY_SLOW_UNITS_PER_DAY = float(os.getenv("VELOCITY_SLOW_UNITS_PER_DAY", "4.0"))   # < 4.0 units/day network (< 1 unit/store/day)
+
+# --------------------------------------------------------------------------
+# Google Gemini API Configuration
+# Gemini is the ONLY external AI API allowed. Keys are strictly loaded from env.
+# --------------------------------------------------------------------------
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY", "")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-1.5-flash")
+GEMINI_TIMEOUT_SECONDS = float(os.getenv("GEMINI_TIMEOUT_SECONDS", "15.0"))
+GEMINI_BASE_URL = os.getenv("GEMINI_BASE_URL", "https://generativelanguage.googleapis.com/v1beta")

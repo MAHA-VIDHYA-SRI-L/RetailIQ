@@ -2,10 +2,17 @@
 
 from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, HTTPException, Query
-from src.models import HealthResponse, CopilotQueryRequest, CopilotQueryResponse
+from src.models import (
+    HealthResponse,
+    CopilotQueryRequest,
+    CopilotQueryResponse,
+    IntentRequest,
+    StructuredIntent,
+)
 from src.copilot import RetailCopilot
 from src.analytics import SalesAnalyticsEngine, EntityNotFoundError, InvalidDateRangeError
 from src.inventory import InventoryIntelligenceEngine
+from src.intent import IntentClassifier
 
 router = APIRouter(prefix="/api", tags=["api"])
 copilot = RetailCopilot()
@@ -17,6 +24,15 @@ inventory = InventoryIntelligenceEngine()
 async def api_health() -> HealthResponse:
     """API health status endpoint."""
     return HealthResponse(status="healthy")
+
+
+intent_classifier = IntentClassifier()
+
+
+@router.post("/copilot/intent", response_model=StructuredIntent)
+async def analyze_intent(request: IntentRequest) -> StructuredIntent:
+    """Analyze a natural-language question and return the validated structured intent."""
+    return intent_classifier.classify(request.question)
 
 
 @router.post("/query", response_model=CopilotQueryResponse)
